@@ -1,0 +1,95 @@
+{% extends 'pay/base_site.html' %}
+    {% block body %}
+        {% if perms.pay %}
+            {% if perms.pay.cdrs %}
+        <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+        <h2>Cdrs</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Cgrid</th>
+                            <th>Run_id</th>
+                            <th>Origin_host</th>
+                            <th>Source</th>
+                            <th>Origin_id</th>
+                            <th>Tor</th>
+                            <th>Request_type</th>
+                            <th>Tenant</th>
+                            <th>Category</th>
+                            <th>Account</th>
+                            <th>Subject</th>
+                            <th>Destination</th>
+                            <th>Setup_time</th>
+                            <th>Answer_time</th>
+                            <th>Usage</th>
+                            <th>Cost_source</th>
+                            <th>Cost</th>
+                            <th>Created_at</th>
+                            <th>Updated_at</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cdr in cdrs %}
+                            <tr>
+                                <td>{{ cdr.cgrid }}</td>
+                                <td>{{ cdr.run_id }}</td>
+                                <td>{{ cdr.origin_host }}</td>
+                                <td>{{ cdr.source }}</td>
+                                <td>{{ cdr.origin_id }}</td>
+                                <td>{{ cdr.tor }}</td>
+                                <td>{{ cdr.request_type }}</td>
+                                <td>{{ cdr.tenant }}</td>
+                                <td>{{ cdr.category }}</td>
+                                <td>{{ cdr.account }}</td>
+                                <td>{{ cdr.subject }}</td>
+                                <td>{{ cdr.destination }}</td>
+                                <td>{{ cdr.setup_time }}</td>
+                                <td>{{ cdr.answer_time }}</td>
+                                <td>{{ cdr.usage }}</td>
+                                <td>{{ cdr.cost_source }}</td>
+                                <td>{{ cdr.cost }}</td>
+                                <td>{{ cdr.created_at }}</td>
+                                <td>{{ cdr.updated_at }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        <!-- Graphs -->
+        {% autoescape off %}
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+                <script>
+                    var ctx = document.getElementById("myChart");
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: {{ dates }},
+                            datasets: [{
+                                label: 'Cost',
+                                data: {{ costs }},
+                                lineTension: 0,
+                                backgroundColor: '#007bff',
+                                borderColor: '#007bff',
+                                borderWidth: 4,
+                                pointBackgroundColor: '#007bff'
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: false
+                                    },
+                                    stacked:true
+                                }]
+                            },
+                            legend: {
+                                display: false,
+                            }
+                        }
+                    });
+                </script>
+                {% endautoescape %}
+            {% endif %}
+        {% endif %}
+    {% endblock %}

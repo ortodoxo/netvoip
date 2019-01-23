@@ -1,0 +1,200 @@
+{% extends 'pay/base_site.html' %}
+
+{% block body %}
+    <div class="row">
+     <div class="col-md-4 order-md-2 mb-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">You Account</span>
+            <span class="badge badge-secondary badge-pill">3</span>
+          </h4>
+          <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Tenant</h6>
+                <small class="text-muted">domain of carrier</small>
+              </div>
+              <span class="text-muted">{{ Tenant }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Account</h6>
+                <small class="text-muted">Customer or carrier account </small>
+              </div>
+              <span class="text-muted">{{ Account }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Counter</h6>
+                <small class="text-muted">Counter</small>
+              </div>
+              <span class="text-muted">{{UnitCounters}}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between bg-light">
+              <div class="text-success">
+                <h6 class="my-0">Balance</h6>
+                <small>Balance amount</small>
+              </div>
+              <span class="text-success">${{ Value }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Total (USD)</span>
+              <strong>${{ Value }}</strong>
+            </li>
+          </ul>
+     </div>
+<div class="col-md-8 order-md-1">
+          <h4 class="mb-3">Balance Add</h4>
+          <form class="needs-validation" novalidate action="{% url 'balance_add' ID Tenant %}" method="post">
+              {% csrf_token %}
+            <div class="row">
+
+              <div class="col-md-6 mb-3">
+                <label for="Tenant">Tenant</label>
+                {{ form.tenant }}
+                <div class="invalid-feedback">
+                  Valid Tenant is required.
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="Account">Account</label>
+                {{ form.account }}
+                <div class="invalid-feedback">
+                  Valid Account is required.
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                 <label for="Balanceuuid">Balance Uuid</label>
+                  {{ form.balanceuuid }}
+                 <div class="invalid-feedback">
+                   Valid Balance Uuid is required
+                 </div>
+              </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="balanceid">Balance Id</label>
+                    {{ form.balanceid }}
+                    <div class="invalid-feedback">
+                        Valid Id is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="BalanceType">Balance Type</label>
+                    {{ form.balancetype }}
+                    <div class="invalid-feedback">
+                        Valid BalanceType is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="Directions">Directions</label>
+                    {{ form.directions }}
+                    <div class="invalid-feedback">
+                        Valid Directions is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="ExpiryTime">ExpiryTime</label>
+                    {{ form.expirytime }}
+                    <div class="invalid-feedback">
+                        Valid ExpiryTime is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="RatingSubject">RatingSubject</label>
+                    {{ form.ratingsubject }}
+                    <div class="invalid-feedback">
+                        Valid RatingSubject is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="categories">Categories</label>
+                    {{ form.categories }}
+                    <div class="invalid-feedback">
+                        Valid Categories is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="destinationids">Destinationids</label>
+                    {{ form.destinationids}}
+                    <div class="invalid-feedback">
+                        Valid Destinationids is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="timingids">Timingids</label>
+                    {{ form.timingids }}
+                    <div class="invalid-feedback">
+                        Valid Timingids is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="weight">Weight</label>
+                    {{ form.weight }}
+                    <div class="invalid-feedback">
+                        Valid Weight is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="sharedgroups">Sharedgroups</label>
+                    {{ form.sharedgroups }}
+                    <div class="invalid-feedback">
+                        Valid Sharedgroups is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="overwrite">Overwrite</label>
+                    {{ form.overwrite }}
+                    <div class="invalid-feedback">
+                        Valid Overwrite is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="blocker">Blocker</label>
+                    {{ form.blocker }}
+                    <div class="invalid-feedback">
+                        Valid Blocker is required
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="disabled">Disabled</label>
+                    {{ form.disabled }}
+                    <div class="invalid-feedback">
+                        Valid Disabled is required
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="mb-3">
+              <label for="Value">Value</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">$</span>
+                </div>
+                  {{ form.value }}
+                <div class="invalid-feedback" style="width: 100%;">
+                  Your Value is required.
+                </div>
+              </div>
+            </div>
+
+              <hr class="mb-4">
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
+          </form>
+        </div>
+    </div>
+{% endblock %}

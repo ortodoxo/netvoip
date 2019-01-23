@@ -1,0 +1,27 @@
+{% extends 'pay/base_site.html' %}
+
+{% block body %}
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>BalanceMap</th>
+                    <th>UnitCounters</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ Uuid }}</td>
+                <td>{{ Value }}</td>
+                <td>{{ UnitCounters }}</td>
+                <td>
+                    <a href="{% url 'balance_add' ID Tenant %}" class="badge badge-primary">Add</a>
+                    <a href="#" class="badge badge-danger">Reset</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
