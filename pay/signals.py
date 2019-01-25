@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from pay.models import RateDeck, TpDestinations, TpRatingProfiles, TpAccountActions, TpActionTriggers, \
     TpActions, TpActionPlans, TpDerivedChargers,TpCdrStats, TpSharedGroups, Filters, TpResources, TpThresholds, \
-    TpSuppliers, TpAttributes
+    TpSuppliers, TpAttributes, Balance
 from pay.tasks import uploadrate, delete_rating_plan
 from django.db import transaction
 import requests
@@ -455,6 +455,7 @@ def RemoveAccount(Tenant,Account):
     print(r.content)
 
 def SetAccount(Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled):
+    balance = Balance(Tenant,Account)
     if AllowNegative == 0:
         AllowNegative = False
     else:
@@ -479,6 +480,8 @@ def SetAccount(Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabl
 
     r = requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
     print(r.content)
+    print(balance.AddBalance(Tenant,Account,BalanceId="MONETARY",BalanceType="*monetary", Value=0))
+
 
 def RemoveActionTrigger(GroupID,UniqueID):
     payload = {"id":1,

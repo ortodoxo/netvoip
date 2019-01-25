@@ -908,6 +908,50 @@ class Balance(CgratesAPI):
         }
         return self.Query(payload)
 
+    def AddBalance(self, Tenant='',Account='',BalanceUuid='',BalanceId='',BalanceType="*monetary",Directions='',Value=0,ExpiryTime='',RatingSubject='',
+                   Categories='',DestinationIds='',TimingIds='',Weight='',SharedGroups='',Overwrite=False,Blocker=False,Disabled=False):
+        self.Tenant=Tenant
+        self.Account=Account
+        self.BalanceUuid=BalanceUuid
+        self.BalanceId=BalanceId
+        self.BalanceType=BalanceType
+        self.Directions=Directions
+        self.Value=Value
+        self.ExpiryTime=ExpiryTime
+        self.RatingSubject=RatingSubject
+        self.Categories=Categories
+        self.DestinationIds=DestinationIds
+        self.TimingIds=TimingIds
+        self.Weight=Weight
+        self.SharedGroups=SharedGroups
+        self.Overwrite=Overwrite
+        self.Blocker=Blocker
+        self.Disabled=Disabled
+
+        payload = {"id":1,
+                   "method":"ApierV1.AddBalance",
+                   "params":[{
+                       "Tenant":self.Tenant,
+                       "Account":self.Account,
+                       "BalanceUuid":self.BalanceUuid,
+                       "BalanceId":self.BalanceId,
+                       "BalanceType":self.BalanceType,
+                       "Directions":self.Directions,
+                       "Value":self.Value,
+                       "ExpiryTime":self.ExpiryTime,
+                       "RatingSubject":self.RatingSubject,
+                       "Categories":self.Categories,
+                       "DestinationIds":self.DestinationIds,
+                       "TimingIds":self.TimingIds,
+                       "Weight":self.Weight,
+                       "SharedGroups":self.SharedGroups,
+                       "Overwrite":self.Overwrite,
+                       "Blocker":self.Blocker,
+                       "Disabled":self.Disabled
+                   }]
+        }
+        return self.Query(payload)
+
 
 
 
