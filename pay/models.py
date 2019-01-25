@@ -836,9 +836,20 @@ class Balance(CgratesAPI):
     def __init__(self,Tenant='', Account=''):
         self.server=settings.CGRATES_JSONRPC
         self.head=settings.CGRATES_HEAD
-        json = self.GetAccount(Tenant,Account)
         self.Tenant = Tenant
         self.Account = Account
+
+
+    def GetAccount(self, Tenant, Account):
+        payload = {
+            "id": 1,
+            "method": "ApierV1.GetAccount",
+            "params": [{
+                "Tenant": Tenant,
+                "Account": Account
+            }]
+        }
+        json = self.Query(payload)
         self.BalanceUuid = json['result']['BalanceMap']['*monetary*out'][0]['Uuid']
         self.BalanceId = json['result']['BalanceMap']['*monetary*out'][0]['Id']
         self.BalanceType = json['result']['UnitCounters'][0]['BalanceType']
@@ -853,17 +864,6 @@ class Balance(CgratesAPI):
         self.SharedGroups=json['result']['BalanceMap']['*monetary*out'][0]['SharedGroup']
         self.Disabled = json['result']['BalanceMap']['*monetary*out'][0]['Disabled']
         self.UnitCounters = json['result']['UnitCounters'][0]['Balances'][0]['Value']
-
-    def GetAccount(self, Tenant, Account):
-        payload = {
-            "id": 1,
-            "method": "ApierV1.GetAccount",
-            "params": [{
-                "Tenant": Tenant,
-                "Account": Account
-            }]
-        }
-        return self.Query(payload)
 
     def SetBalance(self, Tenant='',Account='',BalanceType="*monetary", BalanceUUID='', BalanceID='', Directions='',
                    Value = 0, ExpiryTime= '', RatingSubject='', Categories='', DestinationIds='', TimingIds='', Weight=0,
@@ -909,7 +909,7 @@ class Balance(CgratesAPI):
         return self.Query(payload)
 
     def AddBalance(self, Tenant='',Account='',BalanceUuid='',BalanceId='',BalanceType="*monetary",Directions='',Value=0,ExpiryTime='',RatingSubject='',
-                   Categories='',DestinationIds='',TimingIds='',Weight='',SharedGroups='',Overwrite=False,Blocker=False,Disabled=False):
+                   Categories='',DestinationIds='',TimingIds='',Weight=0,SharedGroups='',Overwrite=False,Blocker=False,Disabled=False):
         self.Tenant=Tenant
         self.Account=Account
         self.BalanceUuid=BalanceUuid

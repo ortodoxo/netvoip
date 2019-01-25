@@ -88,7 +88,8 @@ class Balance_Add(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         AccountActions = self.get_object(kwargs['id'])
-        balance = Balance(AccountActions.tenant,AccountActions.account)
+        balance = Balance()
+        balance.GetAccount(AccountActions.tenant,AccountActions.account)
         self.initial = {'balanceid':AccountActions.account,'tenant':AccountActions.tenant,'account':AccountActions.account,
                         'value':balance.Value, 'balancetype':balance.BalanceType, 'balanceuuid':balance.BalanceUuid,'balanceid':balance.BalanceId,
                         'directions':balance.Directions,'expirytime':balance.ExpiryTime,'ratingsubject':balance.RatingSubject,'categories':balance.Categories,
