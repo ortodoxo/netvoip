@@ -107,9 +107,11 @@ class Balance_Add(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
-        print(form.is_valid())
         if form.is_valid():
-            balance = Balance(form.cleaned_data['tenant'],form.cleaned_data['account'])
+            tenant = form.cleaned_data['tenant']
+            account = form.cleaned_data['account']
+            balance = Balance()
+            balance.GetAccount(tenant,account)
             form.cleaned_data['balanceid'] = balance.BalanceId
             form.cleaned_data['directions'] = balance.Directions
             form.cleaned_data['balanceuuid'] = balance.BalanceUuid
