@@ -172,6 +172,7 @@ class CreateTpSupplier(ModelForm):
         fields = '__all__'
         widgets = {
             'tenant': Select(choices=upload_rating_profile()),
+            'supplier_ratingplan_ids': Select(choices=upload_rating_plan())
         }
 
 class CreateTpFilter(ModelForm):

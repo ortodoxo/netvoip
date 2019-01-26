@@ -707,10 +707,10 @@ class TpSuppliers(models.Model):
     supplier_ratingplan_ids = models.CharField(max_length=64,blank=True)
     supplier_resource_ids = models.CharField(max_length=64,blank=True)
     supplier_stat_ids = models.CharField(max_length=64,blank=True)
-    supplier_weight= models.DecimalField(max_digits=8,decimal_places=2,blank=True)
+    supplier_weight= models.DecimalField(max_digits=8,decimal_places=2,blank=True, default=0.0)
     supplier_blocker = models.IntegerField(choices=((1,'true'),(0,'false'),),blank=True)
     supplier_parameters = models.CharField(max_length=64,blank=True)
-    weight = models.DecimalField(max_digits=8, decimal_places=2,blank=True)
+    weight = models.DecimalField(max_digits=8, decimal_places=2,blank=True,default=0.0)
     created_at = models.DateTimeField()
 
     class Meta:
