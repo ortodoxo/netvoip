@@ -67,7 +67,10 @@ class AccountDetail(LoginRequiredMixin,DetailView):
 
     def get(self, request, id):
         self.object = self.get_object(id)
-        balance = Balance(self.object.tenant,self.object.account)
+        tenant = self.object.tenant
+        account = self.object.account
+        balance = Balance()
+        balance.GetAccount(tenant,account)
         context = self.get_context_data(object=json)
         context['Uuid'] = balance.BalanceUuid
         context['Value']  = balance.Value
