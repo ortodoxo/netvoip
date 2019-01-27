@@ -686,12 +686,9 @@ class Filters(models.Model):
 
 class TpSuppliers(models.Model):
     STRATEGY = (
-        ('*static', '*static'),
-        ('*lowest_cost', '*lowest_cost'),
-        ('*highest_cost', '*highest_cost'),
-        ('*qos_with_threshold', '*qos_with_threshold'),
+        ('*least_cost', '*least_cost'),
         ('*qos', '*qos'),
-        ('*load_distribution', '*load_distribution')
+        ('*weight', '*weight')
     )
     p_k = models.AutoField(primary_key=True)
     tpid= models.CharField(max_length=64, default='CgratesPay')
