@@ -332,15 +332,38 @@ def pre_delete_Thresholds(sender, instance, **kwargs):
     ID  = Thresholds.id
     RemoveThresholdProfile(Tenant, ID)
 
+def Supplier_Parse(supplier):
+    sup_array =[]
+
+    for sup in supplier:
+        print(sup.supplier_id)
+        Supplier_Json = {
+            "ID": sup.supplier_id if sup.supplier_id is not "" else "",  # SupplierID
+            "FilterIDs": [sup.supplier_filter_ids] if sup.supplier_filter_ids is not "" else None,
+            "AccountIDs": [sup.supplier_account_ids] if sup.supplier_account_ids is not "" else None,         # []string
+            "RatingPlanIDs":[sup.supplier_ratingplan_ids] if sup.supplier_ratingplan_ids is not "" else None,      # []string // used when computing price
+            "ResourceIDs": [sup.supplier_resource_ids] if sup.supplier_resource_ids is not "" else None,        # []string // queried in some strategies
+            "StatIDs": [sup.supplier_stat_ids] if sup.supplier_stat_ids is not "" else None,            # []string // queried in some strategies
+            "Weight": float(sup.supplier_weight) if sup.supplier_weight is not "" else float(0.0),       # float64
+            "Blocker": False if sup.supplier_blocker == 1 else True,           # bool // do not process further supplier after this one
+            "SupplierParameters": sup.supplier_parameters if sup.supplier_parameters is not "" else ""    # string
+        }
+        sup_array.append(Supplier_Json)
+    print(sup_array)
+    return sup_array
+
 @receiver(post_save, sender = TpSuppliers)
 def post_save_Suppliers(sender, instance, **kwargs):
     Suppliers = TpSuppliers.objects.get(pk=instance.pk)
+    SuppliersArray =  TpSuppliers.objects.filter(tenant=Suppliers.tenant,id=Suppliers.id)
+    SupplierJson = Supplier_Parse(SuppliersArray)
+
     Tenant = Suppliers.tenant
     ID = Suppliers.id
     FilterIDs = Suppliers.filter_ids
     ActivationInterval = Suppliers.activation_interval
     Sorting = Suppliers.sorting
-    SortingParameters = Suppliers.sorting_parameters
+    SortingParameters = [Suppliers.sorting_parameters] if Suppliers.supplier_parameters is not "" else None
     IDd = Suppliers.supplier_id
     FilterIDsd = Suppliers.supplier_filter_ids
     AccountIDs = Suppliers.supplier_account_ids
@@ -351,7 +374,7 @@ def post_save_Suppliers(sender, instance, **kwargs):
     Blocker = Suppliers.supplier_blocker
     SupplierParameters = Suppliers.sorting_parameters
     Weight = Suppliers.supplier_weight
-    transaction.on_commit(lambda :SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,IDd,FilterIDsd,AccountIDs,RatingPlanIDs,ResourceIDs,StatIDs,Weightd,Blocker,SupplierParameters,Weight))
+    transaction.on_commit(lambda :SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,IDd,FilterIDsd,AccountIDs,RatingPlanIDs,ResourceIDs,StatIDs,Weightd,Blocker,SupplierParameters,Weight,SupplierJson))
 
 @receiver(pre_delete, sender= TpSuppliers)
 def pre_delete_Suppliers(sender, instance, **kwargs):
@@ -911,12 +934,7 @@ def RemoveThresholdProfile(Tenant,ID):
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
     print(r.content)
 
-def SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,IDd,FilterIDsd,AccountIDs,RatingPlanIDs,ResourceIDs,StatIDs,Weightd,Blocker,SupplierParameters,Weight):
-    if Blocker == 1:
-        Blocker = True
-    else:
-        Blocker = False
-
+def SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,IDd,FilterIDsd,AccountIDs,RatingPlanIDs,ResourceIDs,StatIDs,Weightd,Blocker,SupplierParameters,Weight,SupplierJson):
     payload = {
         "id":1,
         "method":"ApierV1.SetSupplierProfile",
@@ -924,23 +942,10 @@ def SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingPar
             "Tenant":Tenant,
             "ID":ID,
             "FilterIDs":[FilterIDs],
-            "ActivationInterval":{
-                "ActivationTime":ActivationInterval,
-                "ExpiryTime":ActivationInterval
-            },
+            "ActivationInterval":None,
             "Sorting":Sorting,
-            "SortingParameters":[SortingParameters],
-            "Suppliers":[{
-                "ID":IDd,
-                "FilterIDs":[FilterIDsd],
-                "AccountIDs":[AccountIDs],
-                "RatingPlanIDs":[RatingPlanIDs],
-                "ResourceIDs":[ResourceIDs],
-                "StatIDs":[StatIDs],
-                "Weight":float(Weightd),
-                "Blocker":Blocker,
-                "SupplierParameters":SupplierParameters
-            }],
+            "SortingParameters":SortingParameters,
+            "Suppliers":SupplierJson,
             "Weight":float(Weight)
         }]
     }
