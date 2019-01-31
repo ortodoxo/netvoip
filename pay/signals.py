@@ -332,24 +332,25 @@ def pre_delete_Thresholds(sender, instance, **kwargs):
     ID  = Thresholds.id
     RemoveThresholdProfile(Tenant, ID)
 
+'''
+Supplier parte take a list of query by tenant and id
+'''
+
 def Supplier_Parse(supplier):
     sup_array =[]
-
     for sup in supplier:
-        print(sup.supplier_id)
         Supplier_Json = {
-            "ID": sup.supplier_id if sup.supplier_id is not "" else "",  # SupplierID
+            "ID": sup.supplier_id if sup.supplier_id is not "" else "",                                             # SupplierID
             "FilterIDs": [sup.supplier_filter_ids] if sup.supplier_filter_ids is not "" else None,
-            "AccountIDs": [sup.supplier_account_ids] if sup.supplier_account_ids is not "" else None,         # []string
-            "RatingPlanIDs":[sup.supplier_ratingplan_ids] if sup.supplier_ratingplan_ids is not "" else None,      # []string // used when computing price
-            "ResourceIDs": [sup.supplier_resource_ids] if sup.supplier_resource_ids is not "" else None,        # []string // queried in some strategies
-            "StatIDs": [sup.supplier_stat_ids] if sup.supplier_stat_ids is not "" else None,            # []string // queried in some strategies
-            "Weight": float(sup.supplier_weight) if sup.supplier_weight is not "" else float(0.0),       # float64
-            "Blocker": False if sup.supplier_blocker == 1 else True,           # bool // do not process further supplier after this one
-            "SupplierParameters": sup.supplier_parameters if sup.supplier_parameters is not "" else ""    # string
+            "AccountIDs": [sup.supplier_account_ids] if sup.supplier_account_ids is not "" else None,               # []string
+            "RatingPlanIDs":[sup.supplier_ratingplan_ids] if sup.supplier_ratingplan_ids is not "" else None,       # []string // used when computing price
+            "ResourceIDs": [sup.supplier_resource_ids] if sup.supplier_resource_ids is not "" else None,            # []string // queried in some strategies
+            "StatIDs": [sup.supplier_stat_ids] if sup.supplier_stat_ids is not "" else None,                        # []string // queried in some strategies
+            "Weight": float(sup.supplier_weight) if sup.supplier_weight is not "" else float(0.0),                  # float64
+            "Blocker": False if sup.supplier_blocker == 1 else True,                                                # bool // do not process further supplier after this one
+            "SupplierParameters": sup.supplier_parameters if sup.supplier_parameters is not "" else ""              # string
         }
         sup_array.append(Supplier_Json)
-    print(sup_array)
     return sup_array
 
 @receiver(post_save, sender = TpSuppliers)

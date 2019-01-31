@@ -7,9 +7,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
-from pay.models import TpAccountActions, Cdrs, TpUsers, CgratesAPI, Balance
+from pay.models import TpAccountActions, Cdrs, TpUsers, CgratesAPI, Balance, CostModel
 from django.views import View
-from .forms import LoginForm, BalanceAddForm
+from .forms import LoginForm, BalanceAddForm, CostForm
 from datetime import datetime
 import requests
 import json
@@ -124,6 +124,35 @@ class Balance_Add(LoginRequiredMixin, View):
             return HttpResponseRedirect('../index')
         return HttpResponseRedirect('../../../dashboard/')
 
+class Cost(LoginRequiredMixin, View):
+    form_class = CostForm
+    model = TpAccountActions
+    initial = {'key': 'value'}
+    template_name = 'pay/Cost.html'
+    costm = CostModel()
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        context['Usage'] = self.costm.Usage
+        context['Cost'] = self.costm.Cost
+        context['ChargesUsage'] = self.costm.ChargesUsage
+        context['ChargesCost'] = self.costm.ChargesCost
+        context['ChargesCompressFactor'] = self.costm.ChargesCompressFactor
+        form = self.form_class(initial=self.initial)
+        context['form'] = form
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            tenant = form.cleaned_data['tenant']
+            category = form.cleaned_data['category']
+            subject = form.cleaned_data['subject']
+            answertime = form.cleaned_data['answertime']
+            destination = form.cleaned_data['destination']
+            usage = form.cleaned_data['usage']
+            self.costm.GetCost(tenant,category,subject,answertime,destination,usage)
+        return HttpResponseRedirect('../cost')
 
 
 class UsersList(LoginRequiredMixin,ListView):

@@ -242,6 +242,13 @@ class BalanceAddForm(forms.Form):
     disabled        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}),required=False)
     value           = forms.DecimalField(max_digits=5, decimal_places=2)
 
+class CostForm(forms.Form):
+    tenant          = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    category        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    subject         = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    answertime      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    destination     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
+    usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
 
 
 

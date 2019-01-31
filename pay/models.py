@@ -772,43 +772,6 @@ class CgratesAPI:
         response = requests.post(self.server,headers = self.head,data=json.dumps(payload))
         return json.loads(response.content.decode('utf-8'))
 
-
-    def GetAccount(self,Tenant,Account):
-        payload = {"id":1,
-               "method":"ApierV1.GetAccount",
-               "params":[{
-                   "Tenant": Tenant,
-                   "Account": Account
-               }]
-        }
-        return self.Query(payload)
-
-    def SetBalance(self, Tenant='',Account='',BalanceType="*monetary", BalanceUUID='', BalanceID='', Directions='',
-                   Value = 0, ExpiryTime= '', RatingSubject='', Categories='', DestinationIds='', TimingIds='', Weight=0,
-                   SharedGroups='',Blocker=False, Disabled=False):
-        payload = {"id":1,
-                   "method":"ApierV1.SetBalance",
-                   "params":[{
-                       "Tenant":Tenant,
-                       "Account":Account,
-                       "BalanceUuid":BalanceUUID,
-                       "BalanceId": BalanceID,
-                       "BalanceType":BalanceType,
-                       "Directions":Directions,
-                       "Value":float(Value),
-                       "ExpiryTime":ExpiryTime,
-                       "RatingSubject":RatingSubject,
-                       "Categories":Categories,
-                       "DestinationIds":DestinationIds,
-                       "TimingIds":TimingIds,
-                       "Weight":Weight,
-                       "SharedGroups":SharedGroups,
-                       "Blocker":Blocker,
-                       "Disabled":Disabled
-                   }]
-        }
-        return self.Query(payload)
-
 class Balance(CgratesAPI):
     Tenant          = ''         #string
     Account         = ''         #string
@@ -949,6 +912,35 @@ class Balance(CgratesAPI):
         }
         return self.Query(payload)
 
+class CostModel(CgratesAPI):
+    Usage=0
+    Cost=0.0
+    ChargesUsage=0
+    ChargesCost=0.0
+    ChargesCompressFactor=0
 
+    def __init__(self, Tenant=''):
+        self.server=settings.CGRATES_JSONRPC
+        self.head=settings.CGRATES_HEAD
+        self.Tenant=Tenant
+
+    def GetCost(self, Tenant='', Category='', Subject='', AnswerTime='', Destination='', Usage=''):
+        payload = {"id":1,
+                   "method":"ApierV1.GetCost",
+                   "params":[{
+                       "Tenant":Tenant,
+                       "Category":Category,
+                       "Subject":Subject,
+                       "AnswerTime":AnswerTime,
+                       "Destination":Destination,
+                       "Usage":Usage
+                   }]
+        }
+        json=self.Query(payload)
+        self.Usage                  = json['result']['Usage']
+        self.Cost                   = json['result']['Cost']
+        self.ChargesUsage           = json['result']['Charges'][0]['Increments'][0]['Usage']
+        self.ChargesCost            = json['result']['Charges'][0]['Increments'][0]['Cost']
+        self.ChargesCompressFactor  = json['result']['Charges'][0]['Increments'][0]['CompressFactor']
 
 
