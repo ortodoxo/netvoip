@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
-from pay.views import AccountList, AccountDetail, CdrsLIst, UsersList, UserDetail, LoginView, LogoutView, Balance_Add, Cost
+from pay.views import AccountList, AccountDetail, CdrsLIst, UsersList, UserDetail, LoginView, LogoutView, Balance_Add, Cost, SupplierGet
 
 urlpatterns = [
     path('account/', AccountList.as_view(), name='accountactions'),
@@ -12,5 +12,6 @@ urlpatterns = [
     path('dashboard/', CdrsLIst.as_view(),name='dashboard'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout', LogoutView.as_view(), name='logout'),
-    path('cost', Cost.as_view(), name='cost')
+    path('cost', Cost.as_view(), name='cost'),
+    path('supplierquery',SupplierGet.as_view(), name='supplierquery')
 ]

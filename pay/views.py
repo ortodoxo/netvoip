@@ -7,9 +7,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
-from pay.models import TpAccountActions, Cdrs, TpUsers, CgratesAPI, Balance, CostModel
+from pay.models import TpAccountActions, Cdrs, TpUsers, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query
 from django.views import View
-from .forms import LoginForm, BalanceAddForm, CostForm
+from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from datetime import datetime
 import requests
 import json
@@ -153,6 +153,19 @@ class Cost(LoginRequiredMixin, View):
             usage = form.cleaned_data['usage']
             self.costm.GetCost(tenant,category,subject,answertime,destination,usage)
         return HttpResponseRedirect('../cost')
+
+
+class SupplierGet(LoginRequiredMixin,View):
+    form = SupplierQuery
+    model = TpSuppliers
+    initial = {'key': 'value'}
+    template_name = 'pay/SupplierQuery.html'
+    supplier_query = SupplierQuery
+
+    def get(self,request,*args,**kwargs):
+        context = {}
+        context['form'] = self.form
+        return render(request,self.template_name,context)
 
 
 class UsersList(LoginRequiredMixin,ListView):
