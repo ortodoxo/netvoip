@@ -250,5 +250,12 @@ class CostForm(forms.Form):
     destination     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
 
+class SupplierQuery(forms.Form):
+    tenant = forms.CharField()
+    id = forms.CharField()
+    context =forms.CharField()
+    time =forms.CharField()
+    event = forms.TextInput()
+
 
 
