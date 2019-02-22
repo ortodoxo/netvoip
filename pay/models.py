@@ -925,15 +925,17 @@ class CostModel(CgratesAPI):
         self.Tenant=Tenant
 
     def GetCost(self, Tenant='', Category='', Subject='', AnswerTime='', Destination='', Usage=''):
+        self.Tenant = Tenant
+        self.Usage  = Usage
         payload = {"id":1,
                    "method":"ApierV1.GetCost",
                    "params":[{
-                       "Tenant":Tenant,
+                       "Tenant":self.Tenant,
                        "Category":Category,
                        "Subject":Subject,
                        "AnswerTime":AnswerTime,
                        "Destination":Destination,
-                       "Usage":Usage
+                       "Usage":self.Usage
                    }]
         }
         json=self.Query(payload)
@@ -952,22 +954,24 @@ class Suppliers_Query(CgratesAPI):
         self.server=settings.CGRATES_JSONRPC
         self.head=settings.CGRATES_HEAD
 
-    def GetSuppliers(self,tenant='',ID='',Context='',Time='',Event={}):
+    def GetSuppliers(self,tenant='',ID='',Context='',Time='',Event=''):
         payload = {
-            "id":1,
+            "id": 1,
             "method":"SupplierSv1.GetSuppliers",
             "params":[{
-                "APIKey":"",
-                "IgnoreErrors":False,
+                "APIKey":"","IgnoreErrors":False,
                 "MaxCost":"",
                 "Tenant":tenant,
                 "ID":ID,
                 "Context":Context,
                 "Time":Time,
-                "Event":Event
-            }]
+                "Event":json.loads(Event),
+                "Limit":None,
+                "Offset":None,
+                "SearchTerm":""}]
         }
-        json = self.Query(payload)
+        Json = self.Query(payload)
+        return Json['result']
 
 
 

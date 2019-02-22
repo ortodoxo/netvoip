@@ -1,0 +1,29 @@
+{% extends 'pay/base_site.html' %}
+{% block body %}
+    <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th>SupplierID</th>
+                  <th>SupplierParameters</th>
+                  <th>Cost</th>
+                  <th>RatingPlanID</th>
+                  <td>Weight</td>
+                </tr>
+              </thead>
+              <tbody>
+              {% if perms.pay %}
+                {% for supp in suppliers %}
+                  <tr>
+                    <td>{{ supp }}</td>
+                    <td>{{ supp }}</td>
+                    <td>{{ supp }}</td>
+                    <td>{{ supp }}</td>
+                    <td>{{ supp }}</td>
+                  </tr>
+                {% endfor %}
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+{% endblock %}

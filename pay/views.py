@@ -133,6 +133,7 @@ class Cost(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         context = {}
+        context['Tenant'] = self.costm.Tenant
         context['Usage'] = self.costm.Usage
         context['Cost'] = self.costm.Cost
         context['ChargesUsage'] = self.costm.ChargesUsage
@@ -160,12 +161,26 @@ class SupplierGet(LoginRequiredMixin,View):
     model = TpSuppliers
     initial = {'key': 'value'}
     template_name = 'pay/SupplierQuery.html'
-    supplier_query = SupplierQuery
+    supplier_query = Suppliers_Query()
 
     def get(self,request,*args,**kwargs):
         context = {}
         context['form'] = self.form
         return render(request,self.template_name,context)
+
+    def post(self,request,*args, **kwargs):
+        form = self.form(request.POST)
+        if form.is_valid():
+            tenant = form.cleaned_data['tenant']
+            id = form.cleaned_data['id']
+            context = form.cleaned_data['context']
+            time = form.cleaned_data['time']
+            event = form.cleaned_data['event']
+            json = self.supplier_query.GetSuppliers(tenant,id,context,time,event)
+            print(json)
+        return HttpResponseRedirect('../supplierquery')
+
+
 
 
 class UsersList(LoginRequiredMixin,ListView):
