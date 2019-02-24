@@ -13,13 +13,13 @@
               </thead>
               <tbody>
               {% if perms.pay %}
-                {% for supp in suppliers %}
+                {% for supplier in  SortedSuppliers %}
                   <tr>
-                    <td>{{ supp }}</td>
-                    <td>{{ supp }}</td>
-                    <td>{{ supp }}</td>
-                    <td>{{ supp }}</td>
-                    <td>{{ supp }}</td>
+                    <td>{{ supplier.SupplierID }}</td>
+                    <td>{{ supplier.SupplierParameters }}</td>
+                    <td>{{ supplier.SortingData.Cost }}</td>
+                    <td>{{ supplier.SortingData.RatingPlanID }}</td>
+                    <td>{{ supplier.SortingData.Weight }}</td>
                   </tr>
                 {% endfor %}
               {% endif %}

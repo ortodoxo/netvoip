@@ -946,13 +946,18 @@ class CostModel(CgratesAPI):
         self.ChargesCompressFactor  = json['result']['Charges'][0]['Increments'][0]['CompressFactor']
 
 class Suppliers_Query(CgratesAPI):
-    ProfileID=''
-    Sorting=''
+    profileid = ''
+    sorting = ''
     SortedSuppliers = {}
 
     def __init__(self):
         self.server=settings.CGRATES_JSONRPC
         self.head=settings.CGRATES_HEAD
+
+    def ParseSupplierformat(self, data):
+        self.profileid  = data['result']['ProfileID']
+        self.sorting    = data['result']['Sorting']
+        self.SortedSuppliers = data['result']['SortedSuppliers']
 
     def GetSuppliers(self,tenant='',ID='',Context='',Time='',Event=''):
         payload = {
@@ -971,7 +976,7 @@ class Suppliers_Query(CgratesAPI):
                 "SearchTerm":""}]
         }
         Json = self.Query(payload)
-        return Json['result']
+        self.ParseSupplierformat(Json)
 
 
 

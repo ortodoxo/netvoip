@@ -170,16 +170,18 @@ class SupplierGet(LoginRequiredMixin,View):
 
     def post(self,request,*args, **kwargs):
         form = self.form(request.POST)
+        contex = {}
         if form.is_valid():
             tenant = form.cleaned_data['tenant']
             id = form.cleaned_data['id']
             context = form.cleaned_data['context']
             time = form.cleaned_data['time']
             event = form.cleaned_data['event']
-            json = self.supplier_query.GetSuppliers(tenant,id,context,time,event)
-            print(json)
-        return HttpResponseRedirect('../supplierquery')
-
+            self.supplier_query.GetSuppliers(tenant,id,context,time,event)
+            contex['ProfileID'] = str(self.supplier_query.profileid)
+            contex['Sorting'] = self.supplier_query.sorting
+            contex['SortedSuppliers'] = self.supplier_query.SortedSuppliers
+        return render(request,'pay/SupplierResult.html',contex)
 
 
 
