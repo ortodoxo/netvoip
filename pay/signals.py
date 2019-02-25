@@ -6,6 +6,7 @@ from pay.models import RateDeck, TpDestinations, TpRatingProfiles, TpAccountActi
     TpSuppliers, TpAttributes, Balance
 from pay.tasks import uploadrate, delete_rating_plan
 from django.db import transaction
+from requests.exceptions import ConnectionError
 import requests
 import json
 
@@ -962,9 +963,10 @@ def RemoveSupplierProfile(Tenant,ID):
             "ID": ID
         }]
     }
-    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
-    print(r.content)
-
+    try:
+        r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
+    except ConnectionError:
+        pass
 def SetAttributeProfile(Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight):
     '''
 
