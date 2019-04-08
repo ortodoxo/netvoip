@@ -176,8 +176,10 @@ class SupplierGet(LoginRequiredMixin,View):
             id = form.cleaned_data['id']
             context = form.cleaned_data['context']
             time = form.cleaned_data['time']
-            event = form.cleaned_data['event']
-            self.supplier_query.GetSuppliers(tenant,id,context,time,event)
+            accont = form.cleaned_data['accont']
+            destinations = form.cleaned_data['destinations']
+            print(tenant,id,context,time,accont,destinations)
+            self.supplier_query.GetSuppliers(tenant,id,context,time,accont,destinations)
             contex['ProfileID'] = str(self.supplier_query.profileid)
             contex['Sorting'] = self.supplier_query.sorting
             contex['SortedSuppliers'] = self.supplier_query.SortedSuppliers

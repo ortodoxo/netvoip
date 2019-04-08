@@ -799,31 +799,38 @@ class Balance(CgratesAPI):
         self.Tenant = Tenant
         self.Account = Account
 
+    def Parse_Balance_Json(self, json):
+        Directions = list(json['result'][0]['UnitCounters']['*monetary'][0]['Counters'][0]['Filter']['Directions'].keys())[0]
+        self.BalanceUuid = json['result'][0]['BalanceMap']['*monetary'][0]['Uuid']
+        self.BalanceId = json['result'][0]['BalanceMap']['*monetary'][0]['ID']
+        self.BalanceType = json['result'][0]['UnitCounters']['*monetary'][0]['Counters'][0]['Filter']['Type']
+        self.Directions = Directions
+        self.Value = json['result'][0]['BalanceMap']['*monetary'][0]['Value']
+        self.ExpiryTime = json['result'][0]['BalanceMap']['*monetary'][0]['ExpirationDate']
+        self.RatingSubject = json['result'][0]['BalanceMap']['*monetary'][0]['RatingSubject']
+        self.Categories = json['result'][0]['BalanceMap']['*monetary'][0]['Categories']
+        self.DestinationIds = json['result'][0]['BalanceMap']['*monetary'][0]['DestinationIDs']
+        self.TimingIds = json['result'][0]['BalanceMap']['*monetary'][0]['TimingIDs']
+        self.Weight = json['result'][0]['BalanceMap']['*monetary'][0]['Weight']
+        self.SharedGroups = json['result'][0]['BalanceMap']['*monetary'][0]['SharedGroups']
+        self.Disabled = json['result'][0]['BalanceMap']['*monetary'][0]['Disabled']
+        self.UnitCounters = json['result'][0]['UnitCounters']['*monetary'][0]['Counters'][0]['Value']
+
+
 
     def GetAccount(self, Tenant, Account):
         payload = {
             "id": 1,
-            "method": "ApierV1.GetAccount",
+            "method": "ApierV2.GetAccounts",
             "params": [{
                 "Tenant": Tenant,
-                "Account": Account
+                "AccountIds": [Account],
+                "Offset":0,
+                "Limit":0
             }]
         }
         json = self.Query(payload)
-        self.BalanceUuid = json['result']['BalanceMap']['*monetary*out'][0]['Uuid']
-        self.BalanceId = json['result']['BalanceMap']['*monetary*out'][0]['Id']
-        self.BalanceType = json['result']['UnitCounters'][0]['BalanceType']
-        self.Directions = json['result']['UnitCounters'][0]['Direction']
-        self.Value = json['result']['BalanceMap']['*monetary*out'][0]['Value']
-        self.ExpiryTime = json['result']['BalanceMap']['*monetary*out'][0]['ExpirationDate']
-        self.RatingSubject = json['result']['BalanceMap']['*monetary*out'][0]['RatingSubject']
-        self.Categories = json['result']['BalanceMap']['*monetary*out'][0]['Category']
-        self.DestinationIds=json['result']['BalanceMap']['*monetary*out'][0]['DestinationIds']
-        self.TimingIds=json['result']['BalanceMap']['*monetary*out'][0]['TimingIDs']
-        self.Weight=json['result']['BalanceMap']['*monetary*out'][0]['Weight']
-        self.SharedGroups=json['result']['BalanceMap']['*monetary*out'][0]['SharedGroup']
-        self.Disabled = json['result']['BalanceMap']['*monetary*out'][0]['Disabled']
-        self.UnitCounters = json['result']['UnitCounters'][0]['Balances'][0]['Value']
+        self.Parse_Balance_Json(json)
 
     def SetBalance(self, Tenant='',Account='',BalanceType="*monetary", BalanceUUID='', BalanceID='', Directions='',
                    Value = 0, ExpiryTime= '', RatingSubject='', Categories='', DestinationIds='', TimingIds='', Weight=0,
@@ -959,18 +966,23 @@ class Suppliers_Query(CgratesAPI):
         self.sorting    = data['result']['Sorting']
         self.SortedSuppliers = data['result']['SortedSuppliers']
 
-    def GetSuppliers(self,tenant='',ID='',Context='',Time='',Event=''):
+    def GetSuppliers(self,tenant='',ID='',Context='',Time='',Account='',Destinations=''):
         payload = {
             "id": 1,
             "method":"SupplierSv1.GetSuppliers",
             "params":[{
-                "APIKey":"","IgnoreErrors":False,
+                "APIKey":"",
+                "IgnoreErrors":False,
                 "MaxCost":"",
                 "Tenant":tenant,
                 "ID":ID,
                 "Context":Context,
                 "Time":Time,
-                "Event":json.loads(Event),
+                "Event":{
+                    "Account":Account,
+                    "Destination":Destinations,
+                    "SetupTime":'*now'
+                },
                 "Limit":None,
                 "Offset":None,
                 "SearchTerm":""}]

@@ -76,6 +76,12 @@ def get_filter():
     row = cursor.fetchall()
     return  row
 
+def get_supplier_id():
+    cursor = connection.cursor()
+    cursor.execute("SELECT DISTINCT id, id FROM tp_suppliers")
+    row = cursor.fetchall()
+    return row
+
 class CreateTpRatingProfiles(ModelForm):
     class Meta:
         models = TpRatingProfiles
@@ -252,10 +258,11 @@ class CostForm(forms.Form):
     usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The call duration so far example 200s'}))
 
 class SupplierQuery(forms.Form):
-    tenant = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Tenant Domain of Carrier'}))
-    id = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'ID of Supplier in place'}))
+    tenant = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_rating_profile())
+    id = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=get_supplier_id())
     context =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':' Context example: *sessions'}),required=False)
     time =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder': 'Time in place to call'}),required=False)
-    event = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control','placeholder':'{"Account":"btb","Destination":"14079108901","SetupTime":"*now"}'}))
+    accont = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_account())
+    destinations = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Destinations'}))
 
 

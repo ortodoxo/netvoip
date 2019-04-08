@@ -42,10 +42,17 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="BalanceType">Event</label>
-                    {{ form.event }}
+                    <label for="balanceid">Account</label>
+                    {{ form.accont }}
                     <div class="invalid-feedback">
-                        Valid destination is required
+                        Valid Account is required
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="balanceid">Destination</label>
+                    {{ form.destinations }}
+                    <div class="invalid-feedback">
+                        Valid Destinations is required
                     </div>
                 </div>
               <hr class="mb-4">
