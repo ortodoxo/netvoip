@@ -2,8 +2,8 @@ from itertools import accumulate
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from pay.models import RateDeck, TpDestinations, TpRatingProfiles, TpAccountActions, TpActionTriggers, \
-    TpActions, TpActionPlans, TpDerivedChargers,TpCdrStats, TpSharedGroups, Filters, TpResources, TpThresholds, \
-    TpSuppliers, TpAttributes, Balance
+    TpActions, TpActionPlans, TpSharedGroups, Filters, TpResources, TpThresholds, \
+    TpSuppliers, TpAttributes, Balance, TpChargers
 from pay.tasks import uploadrate, delete_rating_plan
 from django.db import transaction
 from requests.exceptions import ConnectionError
@@ -40,21 +40,19 @@ def pre_delete_Destinations(sender, instance, **kwargs):
 @receiver(pre_delete, sender=TpRatingProfiles)
 def pre_delete_RatingProfiles(sender, instance, **kwargs):
     profile = TpRatingProfiles.objects.get(pk=instance.pk)
-    Direction = profile.direction
     Tenant = profile.tenant
     Category = profile.category
     Subject = profile.subject
-    RemoveRatingProfile(Direction,Tenant,Category,Subject)
+    RemoveRatingProfile(Tenant,Category,Subject)
 
 @receiver(post_save, sender=TpRatingProfiles)
 def post_save_RatingProfiles(sender, instance, **kwargs):
     profile = TpRatingProfiles.objects.get(pk=instance.pk)
-    Direction = profile.direction
     Tenant = profile.tenant
     Category = profile.category
     Subject = profile.subject
     RatingPlanId = profile.rating_plan_tag
-    transaction.on_commit(lambda :LoadRatingProfile(Direction,Tenant,Category,Subject,RatingPlanId))
+    transaction.on_commit(lambda :LoadRatingProfile(Tenant,Category,Subject,RatingPlanId))
 
 @receiver(pre_delete, sender=TpAccountActions)
 def pre_delete_AccountActions(sender, instance, **kwargs):
@@ -95,7 +93,6 @@ def post_save_ActionTriggers(sender, instance, **kwargs):
     ActivationDate = trigger.activation_time
     BalanceID = trigger.balance_tag
     BalanceType = trigger.balance_type
-    BalanceDirections = trigger.balance_directions
     BalanceDestinationIds = trigger.balance_categories
     BalanceWeight = trigger.balance_weight
     BalanceExpirationDate = trigger.balance_expiry_time
@@ -105,12 +102,11 @@ def post_save_ActionTriggers(sender, instance, **kwargs):
     BalanceSharedGroups = trigger.balance_shared_groups
     BalanceBlocker = trigger.balance_blocker
     BalanceDisabled = trigger.balance_disabled
-    MinQueuedItems = trigger.min_queued_items
     ActionsID = trigger.actions_tag
     SetActionTrigger(GroupID,UniqueID,ThresholdType,ThresholdValue,Recurrent,MinSleep,ExpirationDate,
-                     ActivationDate,BalanceID,BalanceType,BalanceDirections,BalanceDestinationIds,
+                     ActivationDate,BalanceID,BalanceType,BalanceDestinationIds,
                      BalanceWeight,BalanceExpirationDate,BalanceTimingTags,BalanceRatingSubject,BalanceCategories,
-                     BalanceSharedGroups,BalanceBlocker,BalanceDisabled,MinQueuedItems,ActionsID)
+                     BalanceSharedGroups,BalanceBlocker,BalanceDisabled,ActionsID)
 
 @receiver(post_save, sender=TpActions)
 def post_save_Actions(sender, instance, **kwargs):
@@ -121,7 +117,6 @@ def post_save_Actions(sender, instance, **kwargs):
     BalanceId = action.balance_tag
     BalanceUuid = ""
     BalanceType = action.balance_type
-    Directions = action.directions
     Units = action.units
     ExpiryTime = action.expiry_time
     Filter = action.filter
@@ -135,7 +130,7 @@ def post_save_Actions(sender, instance, **kwargs):
     BalanceBlocker = action.balance_blocker
     BalanceDisabled = action.balance_disabled
     Weight = action.weight
-    SetActions(ActionsId, Overwrite, Identifier, BalanceId, BalanceUuid, BalanceType, Directions, Units, ExpiryTime,
+    SetActions(ActionsId, Overwrite, Identifier, BalanceId, BalanceUuid, BalanceType, Units, ExpiryTime,
                Filter, TimingTags, DestinationIds, RatingSubject, Categories, SharedGroups, BalanceWeight,
                ExtraParameters, BalanceBlocker, BalanceDisabled, Weight)
 
@@ -163,86 +158,6 @@ def pre_delete_ActionPlans(sender, instance, **kwargs):
     action = TpActionPlans.objects.get(pk=instance.pk)
     ActionPlanId = action.tag
     RemActionPlan(ActionPlanId)
-
-@receiver(post_save, sender=TpDerivedChargers)
-def post_save_DerivedChargers(sender, instance, **kwargs):
-    derivedcharger = TpDerivedChargers.objects.get(pk=instance.pk)
-    Direction = derivedcharger.direction
-    Tenant = derivedcharger.tenant
-    Category = derivedcharger.category
-    Account = derivedcharger.account
-    Subject = derivedcharger.subject
-    DestinationIds = derivedcharger.destination_ids
-    RunID = derivedcharger.runid
-    RunFilters = derivedcharger.run_filters
-    RequestTypeField = derivedcharger.req_type_field
-    DirectionField = derivedcharger.direction_field
-    TenantField = derivedcharger.tenant_field
-    CategoryField = derivedcharger.category_field
-    AccountField =derivedcharger.account_field
-    SubjectField = derivedcharger.subject_field
-    DestinationField = derivedcharger.destination_field
-    SetupTimeField = derivedcharger.setup_time_field
-    PDDField = derivedcharger.pdd_field
-    AnswerTimeField = derivedcharger.answer_time_field
-    UsageField = derivedcharger.usage_field
-    SupplierField = derivedcharger.supplier_field
-    DisconnectCauseField = derivedcharger.disconnect_cause_field
-    CostField = derivedcharger.cost_field
-    RatedField = derivedcharger.rated_field
-    transaction.on_commit(lambda :SetDerivedChargers(Direction, Tenant, Category, Account, Subject, DestinationIds, RunID,
-                       RunFilters, RequestTypeField, DirectionField, TenantField, CategoryField,
-                       AccountField, SubjectField, DestinationField, SetupTimeField, PDDField, AnswerTimeField,
-                       UsageField, SupplierField, DisconnectCauseField, CostField, RatedField))
-
-
-@receiver(pre_delete, sender=TpDerivedChargers)
-def pre_delete_DerivedChargers(sender, instance, **kwargs):
-    derivedcharger = TpDerivedChargers.objects.get(pk=instance.pk)
-    Direction = derivedcharger.direction
-    Tenant = derivedcharger.tenant
-    Category = derivedcharger.category
-    Account = derivedcharger.account
-    Subject = derivedcharger.subject
-    RemDerivedChargers(Direction, Tenant, Category, Account, Subject)
-
-@receiver(post_save, sender=TpCdrStats)
-def post_save_CdrStats(sender, instance, **kwargs):
-    cdrstats = TpCdrStats.objects.get(pk=instance.pk)
-    Id = cdrstats.tag
-    QueueLength = cdrstats.queue_length
-    TimeWindow = cdrstats.time_window
-    SaveInterval = cdrstats.save_interval
-    Metrics = cdrstats.metrics
-    SetupInterval = cdrstats.setup_interval
-    TOR = cdrstats.tors
-    CdrHost = cdrstats.cdr_hosts
-    CdrSource = cdrstats.cdr_sources
-    ReqType = cdrstats.req_types
-    Direction = cdrstats.directions
-    Tenant = cdrstats.tenants
-    Category = cdrstats.categories
-    Account = cdrstats.accounts
-    Subject = cdrstats.subjects
-    DestinationIds = cdrstats.destination_ids
-    UsageInterval = cdrstats.usage_interval
-    PddInterval = cdrstats.pdd_interval
-    Supplier = cdrstats.suppliers
-    DisconnectCause = cdrstats.disconnect_causes
-    MediationRunIds = cdrstats.mediation_runids
-    RatedAccount = cdrstats.rated_accounts
-    RatedSubject = cdrstats.rated_subjects
-    CostInterval = cdrstats.cost_interval
-    ActionTriggers = cdrstats.action_triggers
-    transaction.on_commit(lambda :AddQueue(Id, QueueLength, TimeWindow, SaveInterval, Metrics, SetupInterval, TOR, CdrHost, CdrSource, ReqType,
-             Direction, Tenant, Category, Account, Subject, DestinationIds, UsageInterval, PddInterval, Supplier,
-             DisconnectCause, MediationRunIds, RatedAccount, RatedSubject, CostInterval, ActionTriggers))
-
-@receiver(pre_delete, sender=TpCdrStats)
-def pre_delete_CdrStats(sender, instance, **kwargs):
-    cdrstats = TpCdrStats.objects.get(pk=instance.pk)
-    qID = cdrstats.tag
-    RemoveQueue(qID)
 
 '''
 Signaling for save a Shared Group into cgrates
@@ -408,6 +323,18 @@ def pre_delete_Attributes(sender, instance, **kwargs):
     Contexts = attributes.contexts
     RemoveAttributeProfile(Tenant, ID, Contexts)
 
+@receiver(post_save,sender = TpChargers)
+def post_save_Chargers(sender, instance, **kwargs):
+    chargers = TpChargers.objects.get(pk=instance.pk)
+    Tenant = chargers.tenant
+    ID = chargers.id
+    FilterIDs = chargers.filter_ids
+    ActivationInterval = chargers.activation_interval
+    RunID = chargers.run_id
+    AttributeIDs = chargers.attribute_ids
+    Weight = chargers.weight
+    AddChargerProfile(Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight)
+
 def LoadDestination(ID, TPid):
     payload = {"id": 1,"method":"ApierV1.LoadDestination","params":[{"TPid":TPid,"ID": ID}]}
     r = requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
@@ -416,12 +343,11 @@ def RemoveDestination(ID):
     payload = {"id": 1,"method":"ApierV1.RemoveDestination","params":[{"DestinationIDs":[ID]}]}
     r = requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
 
-def RemoveRatingProfile(Direction,Tenant,Category,Subject):
+def RemoveRatingProfile(Tenant,Category,Subject):
     payload = {
         "id":1,
         "method":"ApierV1.RemoveRatingProfile",
         "params":[{
-            "Direction":Direction,
             "Tenant":Tenant,
             "Category":Category,
             "Subject":Subject
@@ -431,12 +357,12 @@ def RemoveRatingProfile(Direction,Tenant,Category,Subject):
     print(r)
     print(r.content)
 
-def LoadRatingProfile(Direction,Tenant,Category,Subject,RatingPlanId):
+def LoadRatingProfile(Tenant,Category,Subject,RatingPlanId):
     payload = {"id":1,
                "method":"ApierV1.LoadRatingProfile",
-               "params":[{"TPid":"CgratesPay",
+               "params":[{
+                          "TPid":"CgratesPay",
                           "LoadId":"CSVLOAD",
-                          "Direction":Direction,
                           "Tenant":Tenant,
                           "Category":Category,
                           "Subject":Subject,
@@ -447,14 +373,13 @@ def LoadRatingProfile(Direction,Tenant,Category,Subject,RatingPlanId):
     r= requests.post(SERVER,headers = HEAD,data=json.dumps(payload))
     print(r.content)
 
-def SetRatingProfile(Tenant,Category,Direction,Subject,Overwrite,ActivationTime,RatingPlanId,FallbackSubjects,CdrStatQueueIds):
+def SetRatingProfile(Tenant,Category,Subject,Overwrite,ActivationTime,RatingPlanId,FallbackSubjects,CdrStatQueueIds):
     payload = {
         "id":1,
         "method":"ApierV1.SetRatingProfile",
         "params":[{
             "Tenant":Tenant,
             "Category":Category,
-            "Direction":Direction,
             "Subject":Subject,
             "Overwrite":Overwrite,
             "RatingPlanActivations":[{
@@ -468,6 +393,8 @@ def SetRatingProfile(Tenant,Category,Direction,Subject,Overwrite,ActivationTime,
 
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
     print(r.content)
+
+
 
 def RemoveAccount(Tenant,Account):
     payload = {"id": 1,
@@ -519,8 +446,8 @@ def RemoveActionTrigger(GroupID,UniqueID):
     r= requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
 
 def SetActionTrigger(GroupID,UniqueID,ThresholdType,ThresholdValue,Recurrent,MinSleep,ExpirationDate,ActivationDate,BalanceID,
-                     BalanceType,BalanceDirections,BalanceDestinationIds,BalanceWeight,BalanceExpirationDate,BalanceTimingTags,
-                     BalanceRatingSubject,BalanceCategories,BalanceSharedGroups,BalanceBlocker,BalanceDisabled,MinQueuedItems,
+                     BalanceType,BalanceDestinationIds,BalanceWeight,BalanceExpirationDate,BalanceTimingTags,
+                     BalanceRatingSubject,BalanceCategories,BalanceSharedGroups,BalanceBlocker,BalanceDisabled,
                      ActionsID):
     if Recurrent == 0:
         Recurrent = False
@@ -550,7 +477,7 @@ def SetActionTrigger(GroupID,UniqueID,ThresholdType,ThresholdValue,Recurrent,Min
                    "ActivationDate":ActivationDate,
                    "BalanceID": BalanceID,
                    "BalanceType":BalanceType,
-                   "BalanceDirections":[BalanceDirections],
+                   "BalanceDirections":[],
                    "BalanceDestinationIds":[BalanceDestinationIds],
                    "BalanceWeight": float(BalanceWeight),
                    "BalanceExpirationDate":BalanceExpirationDate,
@@ -560,13 +487,13 @@ def SetActionTrigger(GroupID,UniqueID,ThresholdType,ThresholdValue,Recurrent,Min
                    "BalanceSharedGroups":[BalanceSharedGroups],
                    "BalanceBlocker":BalanceBlocker,
                    "BalanceDisabled":BalanceDisabled,
-                   "MinQueuedItems": int(MinQueuedItems),
+                   "MinQueuedItems": int(),
                    "ActionsID": ActionsID
                }]
     }
     r = requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
 
-def SetActions(ActionsId,Overwrite,Identifier,BalanceId,BalanceUuid,BalanceType,Directions,Units,
+def SetActions(ActionsId,Overwrite,Identifier,BalanceId,BalanceUuid,BalanceType,Units,
                ExpiryTime,Filter,TimingTags,DestinationIds,RatingSubject,Categories,SharedGroups,
                BalanceWeight,ExtraParameters,BalanceBlocker,BalanceDisabled,Weight):
 
@@ -584,7 +511,6 @@ def SetActions(ActionsId,Overwrite,Identifier,BalanceId,BalanceUuid,BalanceType,
                 "BalanceId":BalanceId,
                 "BalanceUuid":BalanceUuid,
                 "BalanceType":BalanceType,
-                "Directions":Directions,
                 "Units":float(Units),
                 "ExpiryTime":ExpiryTime,
                 "Filter":Filter,
@@ -648,110 +574,6 @@ def RemActionPlan(ActionPlanId):
     }
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
     print(r.content)
-
-def SetDerivedChargers(Direction, Tenant, Category, Account, Subject, DestinationIds, RunID,
-                       RunFilters,RequestTypeField,DirectionField,TenantField,CategoryField,
-                       AccountField,SubjectField,DestinationField,SetupTimeField,PDDField,AnswerTimeField,
-                       UsageField,SupplierField,DisconnectCauseField,CostField,RatedField):
-    payload= {
-        "id":1,
-        "method":"ApierV1.SetDerivedChargers",
-        "params":[{
-            "Direction":Direction,
-            "Tenant":Tenant,
-            "Category":Category,
-            "Account":Account,
-            "Subject":Subject,
-            "DestinationIds":DestinationIds,
-            "DerivedChargers":[{
-                "RunID":RunID,
-                "RunFilters":RunFilters,
-                "RequestTypeField":RequestTypeField,
-                "DirectionField":DirectionField,
-                "TenantField":TenantField,
-                "CategoryField":CategoryField,
-                "AccountField":AccountField,
-                "SubjectField":SubjectField,
-                "DestinationField":DestinationField,
-                "SetupTimeField":SetupTimeField,
-                "PDDField":PDDField,
-                "AnswerTimeField":AnswerTimeField,
-                "UsageField":UsageField,
-                "SupplierField":SupplierField,
-                "DisconnectCauseField":DisconnectCauseField,
-                "CostField":CostField,
-                "RatedField":RatedField
-            }]
-        }]
-    }
-    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
-    print(r.content)
-
-def RemDerivedChargers(Direction, Tenant, Category, Account, Subject):
-    payload = {
-        "id":1,
-        "method":"ApierV1.RemDerivedChargers",
-        "params":[{
-            "Direction":Direction,
-            "Tenant":Tenant,
-            "Category":Category,
-            "Account":Account,
-            "Subject":Subject
-        }]
-    }
-    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
-    print(r.content)
-
-
-def AddQueue(Id,QueueLength,TimeWindow,SaveInterval,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,
-             Direction,Tenant,Category,Account,Subject,DestinationIds,UsageInterval,PddInterval,Supplier,
-             DisconnectCause,MediationRunIds,RatedAccount,RatedSubject,CostInterval,ActionTriggers):
-    payload = {
-        "id":1,
-        "method":"CDRStatsV1.AddQueue",
-        "params":[{
-            "Id":Id,
-            "QueueLength":int(QueueLength),
-            "TimeWindow":int(TimeWindow),
-            "SaveInterval":int(SaveInterval),
-            "Metrics":[Metrics],
-            "SetupInterval":[SetupInterval],
-            "TOR":[TOR],
-            "CdrHost":[CdrHost],
-            "CdrSource":[CdrSource],
-            "ReqType":[ReqType],
-            "Direction":[Direction],
-            "Tenant":[Tenant],
-            "Category":[Category],
-            "Account":[Account],
-            "Subject":[Subject],
-            "DestinationIds":[DestinationIds],
-            "UsageInterval":[UsageInterval],
-            "PddInterval":[PddInterval],
-            "Supplier":[Supplier],
-            "DisconnectCause":[DisconnectCause],
-            "MediationRunIds":[MediationRunIds],
-            "RatedAccount":[RatedAccount],
-            "RatedSubject":[RatedSubject],
-            "CostInterval":[float(CostInterval)],
-            "Triggers":[{
-                "ID":ActionTriggers
-            }]
-        }]
-    }
-    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
-    print(r.content)
-
-
-def RemoveQueue(qID):
-    payload = {
-        "id":1,
-        "method":"CDRStatsV1.RemoveQueue",
-        "params":[qID]
-    }
-    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
-    print(r.content)
-
 
 def LoadSharedGroup(TPid,SharedGroupId):
     payload = {
@@ -1025,6 +847,32 @@ def RemoveAttributeProfile(Tenant,ID,Contexts):
             "Tenant":Tenant,
             "ID":ID,
             "Contexts":[Contexts]
+        }]
+    }
+    r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
+    print(r.content)
+
+'''
+    Tenant             string
+    ID                 string
+    FilterIDs          []string
+    ActivationInterval *utils.ActivationInterval // Activation interval
+    RunID              string
+    AttributeIDs       []string // perform data aliasing based on these Attributes
+    Weight             float64
+'''
+def AddChargerProfile(Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight):
+    payload = {
+        "id":1,
+        "method":"ApierV1.SetChargerProfile",
+        "params":[{
+            "Tenant":Tenant,
+            "ID":ID,
+            "FilterIDs":[],
+            "ActivationInterval":None,
+            "RunID":RunID,
+            "AttributeIDs":[AttributeIDs],
+            "Weight":float(Weight)
         }]
     }
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))

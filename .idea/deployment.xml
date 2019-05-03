@@ -16,17 +16,10 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="ortodoxo@192.168.100.142:22 (1)">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/var/www/html" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="root@192.168.100.142:22">
         <serverdata>
           <mappings>
-            <mapping deploy="/var/www/html" local="$PROJECT_DIR$" />
+            <mapping deploy="/var/www/html/cgrates" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

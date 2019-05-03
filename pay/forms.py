@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Select, TimeInput
 from pay.models import TpRatingProfiles, TpAccountActions, TpTimings, TpActionTriggers, TpActionPlans, \
-    TpDerivedChargers, TpCdrStats, TpLcrRules, TpAliases, TpSharedGroups, TpSuppliers, TpAttributes, Filters, TpResources, TpThresholds, TpUsers
+    TpChargers, TpSharedGroups, TpSuppliers, TpAttributes, Filters, TpResources, TpThresholds
 from django.db import connection
 
 def upload_rating_plan():
@@ -87,8 +87,8 @@ class CreateTpRatingProfiles(ModelForm):
         models = TpRatingProfiles
         fields = '__all__'
         widgets = {
-            'rating_plan_tag': Select(choices=upload_rating_plan()),
-            'tenant':Select(choices=user_tenant())
+           # 'rating_plan_tag': Select(choices=upload_rating_plan()),
+            #'tenant':Select(choices=user_tenant())
         }
 
 class CreateTpAccountActions(ModelForm):
@@ -96,9 +96,9 @@ class CreateTpAccountActions(ModelForm):
         models = TpAccountActions
         fields = '__all__'
         widgets = {
-            'tenant': Select(choices=upload_rating_profile()),
-            'action_plan_tag': Select(choices=upload_actions_plan()),
-            'action_triggers_tag': Select(choices=upload_action_triggers()),
+            #'tenant': Select(choices=upload_rating_profile()),
+            #'action_plan_tag': Select(choices=upload_actions_plan()),
+            #'action_triggers_tag': Select(choices=upload_action_triggers()),
         }
 
 class CreateTpActionTriggers(ModelForm):
@@ -106,56 +106,24 @@ class CreateTpActionTriggers(ModelForm):
         models = TpActionTriggers
         fields = '__all__'
         widgets = {
-            'actions_tag': Select(choices=upload_actions_id()),
+            #'actions_tag': Select(choices=upload_actions_id()),
         }
 class CreateTpActionPlans(ModelForm):
     class Meta:
         models = TpActionPlans
         fields = '__all__'
         widgets = {
-            'actions_tag': Select(choices=upload_actions_id()),
+            #'actions_tag': Select(choices=upload_actions_id()),
         }
 
-class CreateTpDerivedChargers(ModelForm):
+class CreateChargers(ModelForm):
     class Meta:
-        models = TpDerivedChargers
+        model = TpChargers
         fields = '__all__'
         widgets = {
-            'tenant': Select(choices=upload_rating_profile()),
-            'category': Select(choices=upload_category()),
-            'account': Select(choices=upload_account()),
-            'subject': Select(choices=upload_subject())
+            #'tenant': Select(choices=upload_rating_profile())
         }
 
-class CreateTpCdrStats(ModelForm):
-    class Meta:
-        models = TpCdrStats
-        fields = '__all__'
-        widgets = {
-            'tenants': Select(choices=upload_rating_profile()),
-            'action_triggers':Select(choices=upload_action_triggers())
-        }
-class CreateTpLcrRules(ModelForm):
-    class Meta:
-        models = TpLcrRules
-        fields = '__all__'
-        widgets = {
-            'tenant': Select(choices=upload_rating_profile()),
-            'category': Select(choices=upload_category()),
-            'account': Select(choices=upload_account()),
-            'subject': Select(choices=upload_subject()),
-        }
-
-class CreateTpAliases(ModelForm):
-    class Meta:
-        models = TpAliases
-        fields = '__all__'
-        widgets = {
-            'tenant': Select(choices=upload_rating_profile()),
-            'category': Select(choices=upload_category()),
-            'account': Select(choices=upload_account()),
-            'subject': Select(choices=upload_subject())
-        }
 class CreateTpTimings(ModelForm):
     class Meta:
         models = TpTimings
@@ -169,7 +137,7 @@ class CreateTpSharedGroups(ModelForm):
         models = TpSharedGroups
         fields = '__all__'
         widgets = {
-            'account': Select(choices=upload_account())
+            #'account': Select(choices=upload_account())
         }
 
 class CreateTpSupplier(ModelForm):
@@ -177,8 +145,8 @@ class CreateTpSupplier(ModelForm):
         models = TpSuppliers
         fields = '__all__'
         widgets = {
-            'tenant': Select(choices=upload_rating_profile()),
-            'supplier_ratingplan_ids': Select(choices=upload_rating_plan())
+            #'tenant': Select(choices=upload_rating_profile()),
+            #'supplier_ratingplan_ids': Select(choices=upload_rating_plan())
         }
 
 class CreateTpFilter(ModelForm):
@@ -186,7 +154,7 @@ class CreateTpFilter(ModelForm):
         models = Filters
         fields = '__all__'
         widgets = {
-            'tenant':Select(choices=upload_rating_profile())
+            #'tenant':Select(choices=upload_rating_profile())
         }
 
 class CreateTpAttributes(ModelForm):
@@ -194,8 +162,8 @@ class CreateTpAttributes(ModelForm):
         models = TpAttributes
         fields = '__all__'
         widgets = {
-            'tenant':Select(choices=upload_rating_profile()),
-            'filter_ids':Select(choices=upload_filter_id())
+            #'tenant':Select(choices=upload_rating_profile()),
+            #'filter_ids':Select(choices=upload_filter_id())
         }
 
 class CreateResource(ModelForm):
@@ -203,8 +171,8 @@ class CreateResource(ModelForm):
         models = TpResources
         fields = '__all__'
         widgets = {
-            'tenant':Select(choices=upload_rating_profile()),
-            'filter_ids':Select(choices=get_filter())
+            #'tenant':Select(choices=upload_rating_profile()),
+            #'filter_ids':Select(choices=get_filter())
         }
 
 
@@ -213,17 +181,9 @@ class CreateThreshold(ModelForm):
         models = TpThresholds
         fields = '__all__'
         widgets = {
-            'tenant':Select(choices=upload_rating_profile()),
-            'filter_ids':Select(choices=get_filter()),
-            'action_ids':Select(choices=upload_actions_id())
-        }
-class CreateUsers(ModelForm):
-    class Meta:
-        models = TpUsers
-        fields = '__all__'
-        widgets = {
-           'tenant':Select(choices=upload_rating_profile()),
-	       'user_name':Select(choices=user_username())
+            #'tenant':Select(choices=upload_rating_profile()),
+            #'filter_ids':Select(choices=get_filter()),
+            #'action_ids':Select(choices=upload_actions_id())
         }
 
 class LoginForm(forms.Form):
@@ -236,7 +196,6 @@ class BalanceAddForm(forms.Form):
     balanceuuid     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), disabled='disabled',required=False)
     balanceid       = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}),disabled='disabled',required=False)
     balancetype     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
-    directions      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), disabled='disabled',required=False)
     expirytime      = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     ratingsubject   = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional:The RatingSubject of the Balance'}), required=False)
     categories      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional:Type of record specifies the kind of transmission this rate'}),required=False)
@@ -258,11 +217,14 @@ class CostForm(forms.Form):
     usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The call duration so far example 200s'}))
 
 class SupplierQuery(forms.Form):
-    tenant = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_rating_profile())
-    id = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=get_supplier_id())
+    #tenant = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_rating_profile())
+    tenant = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    #id = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=get_supplier_id())
+    id = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     context =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':' Context example: *sessions'}),required=False)
     time =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder': 'Time in place to call'}),required=False)
-    accont = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_account())
+    #accont = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_account())
+    accont = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     destinations = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Destinations'}))
 
 

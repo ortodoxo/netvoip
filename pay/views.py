@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
-from pay.models import TpAccountActions, Cdrs, TpUsers, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query
+from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from datetime import datetime
@@ -95,7 +95,7 @@ class Balance_Add(LoginRequiredMixin, View):
         balance.GetAccount(AccountActions.tenant,AccountActions.account)
         self.initial = {'balanceid':AccountActions.account,'tenant':AccountActions.tenant,'account':AccountActions.account,
                         'value':balance.Value, 'balancetype':balance.BalanceType, 'balanceuuid':balance.BalanceUuid,'balanceid':balance.BalanceId,
-                        'directions':balance.Directions,'expirytime':balance.ExpiryTime,'ratingsubject':balance.RatingSubject,'categories':balance.Categories,
+                        'expirytime':balance.ExpiryTime,'ratingsubject':balance.RatingSubject,'categories':balance.Categories,
                         'destinationids':balance.DestinationIds,'timingids':balance.TimingIds,'weight':balance.Weight,'sharedgroups':balance.SharedGroups,
                         'disabled':balance.Disabled}
         context = {}
@@ -116,10 +116,9 @@ class Balance_Add(LoginRequiredMixin, View):
             balance = Balance()
             balance.GetAccount(tenant,account)
             form.cleaned_data['balanceid'] = balance.BalanceId
-            form.cleaned_data['directions'] = balance.Directions
             form.cleaned_data['balanceuuid'] = balance.BalanceUuid
             print(form.cleaned_data['value'])
-            json = balance.SetBalance(form.cleaned_data['tenant'],form.cleaned_data['account'],form.cleaned_data['balancetype'],form.cleaned_data['balanceuuid'],form.cleaned_data['balanceid'],form.cleaned_data['directions'],form.cleaned_data['value'])
+            json = balance.SetBalance(form.cleaned_data['tenant'],form.cleaned_data['account'],form.cleaned_data['balancetype'],form.cleaned_data['balanceuuid'],form.cleaned_data['balanceid'],form.cleaned_data['value'])
             print(json)
             return HttpResponseRedirect('../index')
         return HttpResponseRedirect('../../../dashboard/')
@@ -184,18 +183,6 @@ class SupplierGet(LoginRequiredMixin,View):
             contex['Sorting'] = self.supplier_query.sorting
             contex['SortedSuppliers'] = self.supplier_query.SortedSuppliers
         return render(request,'pay/SupplierResult.html',contex)
-
-
-
-class UsersList(LoginRequiredMixin,ListView):
-    model = TpUsers
-    login_url = '../login'
-    template_name = 'pay/Users.html'
-    context_object_name = 'users'
-
-class UserDetail(DetailView):
-    model = TpUsers
-    template_name = 'pay/UserDetail.html'
 
 
 class LoginView(View):
