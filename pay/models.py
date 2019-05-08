@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from pay.validators import csv_file_validator, activation_time_validate
+from pay.exception import CostError
 import hashlib, binascii, requests, json
 
 import datetime
@@ -714,7 +715,7 @@ class Balance(CgratesAPI):
         return self.Query(payload)
 
 class CostModel(CgratesAPI):
-    Usage=0
+    Usage=''
     Cost=0.0
     ChargesUsage=0
     ChargesCost=0.0
@@ -740,11 +741,14 @@ class CostModel(CgratesAPI):
                    }]
         }
         json=self.Query(payload)
-        self.Usage                  = json['result']['Usage']
-        self.Cost                   = json['result']['Cost']
-        self.ChargesUsage           = json['result']['Charges'][0]['Increments'][0]['Usage']
-        self.ChargesCost            = json['result']['Charges'][0]['Increments'][0]['Cost']
-        self.ChargesCompressFactor  = json['result']['Charges'][0]['Increments'][0]['CompressFactor']
+        if json['result'] == None:
+            raise CostError('Call API ApierV1.GetCost',json['error'])
+        else:
+            self.Usage                  = json['result']['Usage']
+            self.Cost                   = json['result']['Cost']
+            self.ChargesUsage           = json['result']['Charges'][0]['Increments'][0]['Usage']
+            self.ChargesCost            = json['result']['Charges'][0]['Increments'][0]['Cost']
+            self.ChargesCompressFactor  = json['result']['Charges'][0]['Increments'][0]['CompressFactor']
 
 class Suppliers_Query(CgratesAPI):
     profileid = ''

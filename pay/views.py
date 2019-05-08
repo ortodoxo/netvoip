@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
 from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
+from pay.exception import CostError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from datetime import datetime
@@ -143,7 +144,10 @@ class Cost(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        context = {}
+        costerror = False
         form = self.form_class(request.POST)
+        context['form'] = form
         if form.is_valid():
             tenant = form.cleaned_data['tenant']
             category = form.cleaned_data['category']
@@ -151,8 +155,21 @@ class Cost(LoginRequiredMixin, View):
             answertime = form.cleaned_data['answertime']
             destination = form.cleaned_data['destination']
             usage = form.cleaned_data['usage']
-            self.costm.GetCost(tenant,category,subject,answertime,destination,usage)
-        return HttpResponseRedirect('../cost')
+            try:
+                self.costm.GetCost(tenant,category,subject,answertime,destination,usage)
+            except CostError as e:
+                costerror = True
+                context['costerror'] = costerror
+                context['expresion'] = e.expresion
+                context['mensage'] = e.mensage
+                return render(request,self.template_name,context)
+
+            return HttpResponseRedirect('../cost')
+        else:
+            for field in form.errors:
+                form.fields[field].widget.attrs.update({'class':'form-control is-invalid'})
+
+            return render(request,self.template_name,context)
 
 
 class SupplierGet(LoginRequiredMixin,View):

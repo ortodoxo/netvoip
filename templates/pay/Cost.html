@@ -51,8 +51,14 @@
           </ul>
      </div>
     <div class="col-md-8 order-md-1">
+        {% if costerror %}
+            <div class="alert alert-danger" role="alert">
+                {{ expresion }}
+                {{ mensage }}
+            </div>
+        {% endif %}
           <h4 class="mb-3">Cost Query</h4>
-          <form class="needs-validation" novalidate action="{% url 'cost' %}" method="post">
+          <form class="needs-validation {% if form.errors %}was-validated{% endif %}"  action="{% url 'cost' %}" method="post">
               {% csrf_token %}
             <div class="row">
 
@@ -65,7 +71,7 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                <label for="Account">category</label>
+                <label for="Category">Category</label>
                 {{ form.category }}
                 <div class="invalid-feedback">
                   Valid category is required.
@@ -73,41 +79,72 @@
               </div>
 
               <div class="col-md-6 mb-3">
-                 <label for="Balanceuuid">subject</label>
+                 <label for="Subject">Subject</label>
                   {{ form.subject }}
                  <div class="invalid-feedback">
                    Valid subject is required
                  </div>
               </div>
+              <div class="col-md-6 mb-3">
+                 <label for="Answertime">Answertime</label>
+                   {{ form.answertime }}
+                  {% if form.answertime.errors %}
+                      <div class="invalid-tooltip">
+                      {% for error in form.answertime.errors %}
+                          {{ error|escape }}
+                      {% endfor %}
+                      </div>
+                  {% endif %}
+              </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="balanceid">answertime</label>
-                    {{ form.answertime }}
-                    <div class="invalid-feedback">
-                        Valid answertime is required
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="BalanceType">destination</label>
+                    <label for="Destination">Destination</label>
                     {{ form.destination }}
-                    <div class="invalid-feedback">
-                        Valid destination is required
+                    {% if form.destination.errors %}
+                    <div class="invalid-tooltip">
+                    {% for error in form.destination.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="Directions">usage</label>
+                    <label for="Usage">Usage</label>
                     {{ form.usage }}
-                    <div class="invalid-feedback">
-                        Valid usage is required
+                    {% if form.usage.errors %}
+                    <div class="invalid-tooltip">
+                    {% for error in form.destination.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
 
               <hr class="mb-4">
               <button class="btn btn-primary btn-lg btn-block" type="submit">Query</button>
             </div>
           </form>
+        <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+        }, false);
+        })();
+        </script>
         </div>
  </div>
 

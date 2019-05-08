@@ -31,6 +31,19 @@ def csv_file_validator(value):
 
 def activation_time_validate(value):
     #validate the datetime format of cgrates 2014-01-14T00:00:00Z
-    if re.match('^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z',value) == None:
-        raise  ValidationError("The date time for cgrates need to be valid")
+    if re.match("(^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$)|(^\*now$)",value) == None:
+        raise  ValidationError(("The date time:  for cgrates need to be valid"),
+                               code='invalid')
     return  True
+
+def destinations_validate(value):
+    if re.match('^(1[2-9]|[2-9])([0-9]{2})([2-9][0-9]{2})',value) == None:
+        raise ValidationError(("The prefix will be valid"),
+                                  code='invalid')
+    return True
+
+def usage_validate(value):
+    if re.match('^(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?$',value) == None:
+        raise ValidationError(("Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'"),
+                              code='invalid')
+    return True

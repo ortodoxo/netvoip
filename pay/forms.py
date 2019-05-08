@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm, Select, TimeInput
 from pay.models import TpRatingProfiles, TpAccountActions, TpTimings, TpActionTriggers, TpActionPlans, \
     TpChargers, TpSharedGroups, TpSuppliers, TpAttributes, Filters, TpResources, TpThresholds
+from pay.validators import activation_time_validate, destinations_validate, usage_validate
 from django.db import connection
 
 def upload_rating_plan():
@@ -212,9 +213,10 @@ class CostForm(forms.Form):
     tenant          = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Tenant Domain of Carrier'}))
     category        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Type of record specifies the kind of transmission this rate'}))
     subject         = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The RatingSubject of the Balance'}))
-    answertime      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The start time for this time period'}))
-    destination     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Prefix(es) attached to this destination. The prefix or caller id to be added to the specified destination'}))
-    usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The call duration so far example 200s'}))
+    answertime      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The start time for this time period '}),validators=[activation_time_validate])
+    destination     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Destinations 7-digit dialing: 1NXX xxxx (NPA)'}), validators=[destinations_validate])
+    usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h"'}), validators=[usage_validate])
+
 
 class SupplierQuery(forms.Form):
     #tenant = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_rating_profile())
