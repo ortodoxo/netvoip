@@ -1,14 +1,16 @@
-from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
 from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
-from pay.exception import CostError
+from pay.exception import CostError, BalanceError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from datetime import datetime
@@ -80,10 +82,12 @@ class AccountDetail(LoginRequiredMixin,DetailView):
         context['ID'] = self.object.id
         return self.render_to_response(context)
 
+
 class Balance_Add(LoginRequiredMixin, View):
     form_class = BalanceAddForm
     initial = {'key': 'value'}
     template_name = 'pay/balance_add.html'
+    context = {'error':'','balance_error':'','expresion':'','mensage':''}
 
 
     def get_object(self, id):
@@ -93,36 +97,55 @@ class Balance_Add(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         AccountActions = self.get_object(kwargs['id'])
         balance = Balance()
-        balance.GetAccount(AccountActions.tenant,AccountActions.account)
+        try:
+            balance.GetAccount(AccountActions.tenant,AccountActions.account)
+        except BalanceError as e:
+            messages.error(request,e.mensage)
+
         self.initial = {'balanceid':AccountActions.account,'tenant':AccountActions.tenant,'account':AccountActions.account,
-                        'value':balance.Value, 'balancetype':balance.BalanceType, 'balanceuuid':balance.BalanceUuid,'balanceid':balance.BalanceId,
+                        'value':round(balance.Value,2), 'balancetype':balance.BalanceType, 'balanceuuid':balance.BalanceUuid,'balanceid':balance.BalanceId,
                         'expirytime':balance.ExpiryTime,'ratingsubject':balance.RatingSubject,'categories':balance.Categories,
                         'destinationids':balance.DestinationIds,'timingids':balance.TimingIds,'weight':balance.Weight,'sharedgroups':balance.SharedGroups,
                         'disabled':balance.Disabled}
-        context = {}
-        context['Value'] = balance.Value
-        context['UnitCounters'] = balance.UnitCounters
-        context['Tenant'] = AccountActions.tenant
-        context['ID'] = AccountActions.id
-        context['Account'] = AccountActions.account
+        self.context['Value'] = balance.Value
+        self.context['UnitCounters'] = balance.UnitCounters
+        self.context['Tenant'] = AccountActions.tenant
+        self.context['ID'] = AccountActions.id
+        self.context['Account'] = AccountActions.account
         form = self.form_class(initial=self.initial)
-        context['form'] = form
-        return render(request, self.template_name, context)
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
+        self.context['form'] = form
+        balance_error = False
         if form.is_valid():
             tenant = form.cleaned_data['tenant']
             account = form.cleaned_data['account']
             balance = Balance()
-            balance.GetAccount(tenant,account)
-            form.cleaned_data['balanceid'] = balance.BalanceId
-            form.cleaned_data['balanceuuid'] = balance.BalanceUuid
-            print(form.cleaned_data['value'])
-            json = balance.SetBalance(form.cleaned_data['tenant'],form.cleaned_data['account'],form.cleaned_data['balancetype'],form.cleaned_data['balanceuuid'],form.cleaned_data['balanceid'],form.cleaned_data['value'])
-            print(json)
-            return HttpResponseRedirect('../index')
-        return HttpResponseRedirect('../../../dashboard/')
+            try:
+                balance.GetAccount(tenant,account)
+                form.cleaned_data['balanceid'] = balance.BalanceId
+                form.cleaned_data['balanceuuid'] = balance.BalanceUuid
+                json = balance.SetBalance(form.cleaned_data['tenant'],form.cleaned_data['account'],form.cleaned_data['balancetype'],form.cleaned_data['balanceuuid'],form.cleaned_data['balanceid'],form.cleaned_data['value'])
+            except BalanceError as e:
+                balance_error = True
+                self.context['balance_error'] = balance_error
+                self.context['expresion'] = e.expresion
+                self.context['mensage'] = e.mensage
+                fullmsg = str(e.expresion)
+                fullmsg += ' '+str(e.mensage)
+                messages.error(request,fullmsg)
+                return HttpResponseRedirect(reverse('balance_add',kwargs={'id':kwargs['id'],'tenant':kwargs['tenant']}))
+            messages.success(request,'The balance has be update succesfully')
+            return HttpResponseRedirect(reverse('balance_add',kwargs={'id':kwargs['id'],'tenant':kwargs['tenant']}))
+        else:
+            for field in form.errors:
+                form.fields[field].widget.attrs.update({'class':'form-control is-invalid'})
+            self.context['error'] = form.errors
+            messages.error(request,form.errors)
+            return HttpResponseRedirect(reverse('balance_add',kwargs={'id':kwargs['id'],'tenant':kwargs['tenant']}))
 
 class Cost(LoginRequiredMixin, View):
     form_class = CostForm
@@ -145,7 +168,6 @@ class Cost(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         context = {}
-        costerror = False
         form = self.form_class(request.POST)
         context['form'] = form
         if form.is_valid():
@@ -164,7 +186,8 @@ class Cost(LoginRequiredMixin, View):
                 context['mensage'] = e.mensage
                 return render(request,self.template_name,context)
 
-            return HttpResponseRedirect('../cost')
+            context['sucess'] = True
+            return render(request,self.template_name,context)
         else:
             for field in form.errors:
                 form.fields[field].widget.attrs.update({'class':'form-control is-invalid'})

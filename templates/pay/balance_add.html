@@ -42,9 +42,23 @@
             </li>
           </ul>
      </div>
-<div class="col-md-8 order-md-1">
+    <div class="col-md-8 order-md-1">
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
           <h4 class="mb-3">Balance Add</h4>
-          <form class="needs-validation" novalidate action="{% url 'balance_add' ID Tenant %}" method="post">
+          <form class="needs-validation {% if error %}was-validated{% endif %}" action="{% url 'balance_add' ID Tenant %}" method="post">
               {% csrf_token %}
             <div class="row">
 
@@ -91,9 +105,11 @@
                 <div class="col-md-6 mb-3">
                     <label for="ExpiryTime">ExpiryTime</label>
                     {{ form.expirytime }}
-                    <div class="invalid-feedback">
-                        Valid ExpiryTime is required
-                    </div>
+                    {% if form.expirytime.errors %}
+                        <div class="invalid-tooltip">
+                            {{ error|escape }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -187,6 +203,26 @@
               <hr class="mb-4">
               <button class="btn btn-primary btn-lg btn-block" type="submit">Continue to checkout</button>
           </form>
+          <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+            (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+              form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+              }, false);
+            });
+            }, false);
+            })();
+        </script>
         </div>
     </div>
 {% endblock %}

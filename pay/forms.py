@@ -197,7 +197,7 @@ class BalanceAddForm(forms.Form):
     balanceuuid     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), disabled='disabled',required=False)
     balanceid       = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}),disabled='disabled',required=False)
     balancetype     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
-    expirytime      = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    expirytime      = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False, validators=[activation_time_validate])
     ratingsubject   = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional:The RatingSubject of the Balance'}), required=False)
     categories      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional:Type of record specifies the kind of transmission this rate'}),required=False)
     destinationids  = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional:The destination id/tag described in the Destinations'}), required=False)
@@ -207,7 +207,7 @@ class BalanceAddForm(forms.Form):
     overwrite       = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional: '}),required=False)
     blocker         = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Optional: '}),required=False)
     disabled        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}),required=False)
-    value           = forms.DecimalField(max_digits=5, decimal_places=2)
+    value           = forms.DecimalField(decimal_places=2)
 
 class CostForm(forms.Form):
     tenant          = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Tenant Domain of Carrier'}))

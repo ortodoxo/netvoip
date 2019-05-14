@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from pay.validators import csv_file_validator, activation_time_validate
-from pay.exception import CostError
+from pay.exception import CostError, BalanceError
 import hashlib, binascii, requests, json
 
 import datetime
@@ -629,7 +629,11 @@ class Balance(CgratesAPI):
             }]
         }
         json = self.Query(payload)
-        self.Parse_Balance_Json(json)
+        print(json)
+        if json['result'] == None or len(json['result']) == 0:
+            raise BalanceError('Call API ApierV2.GetAccounts',json['error'])
+        else:
+            self.Parse_Balance_Json(json)
 
     def SetBalance(self, Tenant='',Account='',BalanceType="*monetary", BalanceUUID='', BalanceID='', Value = 0,
                    ExpiryTime= '', RatingSubject='', Categories='', DestinationIds='', TimingIds='', Weight=0,
@@ -670,7 +674,12 @@ class Balance(CgratesAPI):
                        "Disabled":self.Disabled
                    }]
         }
-        return self.Query(payload)
+        json =  self.Query(payload)
+
+        if json['result'] == None:
+            raise BalanceError('Call API ApierV1.SetBalance',json['error'])
+        else:
+            return json
 
     def AddBalance(self, Tenant='',Account='',BalanceUuid='',BalanceId='',BalanceType="*monetary",Value=0,ExpiryTime='',RatingSubject='',
                    Categories='',DestinationIds='',TimingIds='',Weight=0,SharedGroups='',Overwrite=False,Blocker=False,Disabled=False):

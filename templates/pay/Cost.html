@@ -56,6 +56,10 @@
                 {{ expresion }}
                 {{ mensage }}
             </div>
+        {% elif sucess %}
+            <div class="alert alert-success" role="alert">
+                Sussefuly {{ costerror }}
+            </div>
         {% endif %}
           <h4 class="mb-3">Cost Query</h4>
           <form class="needs-validation {% if form.errors %}was-validated{% endif %}"  action="{% url 'cost' %}" method="post">
