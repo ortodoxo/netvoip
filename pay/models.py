@@ -10,6 +10,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db import connection
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
@@ -360,6 +361,15 @@ class TpRatingProfiles(models.Model):
     rating_plan_tag = models.CharField(max_length=64)
     fallback_subjects = models.CharField(max_length=64, blank=True, null=True)
     created_at = models.DateTimeField()
+
+    def __str__(self):
+        return self.tenant
+
+    def upload_rating_profile(self):
+        cursor = connection.cursor()
+        cursor.execute("SELECT DISTINCT tenant, tenant FROM tp_rating_profiles")
+        row = cursor.fetchall()
+        return row
 
     class Meta:
         managed = False

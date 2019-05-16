@@ -152,24 +152,17 @@ class Cost(LoginRequiredMixin, View):
     model = TpAccountActions
     initial = {'key': 'value'}
     template_name = 'pay/Cost.html'
+    context = {}
     costm = CostModel()
 
     def get(self, request, *args, **kwargs):
-        context = {}
-        context['Tenant'] = self.costm.Tenant
-        context['Usage'] = self.costm.Usage
-        context['Cost'] = self.costm.Cost
-        context['ChargesUsage'] = self.costm.ChargesUsage
-        context['ChargesCost'] = self.costm.ChargesCost
-        context['ChargesCompressFactor'] = self.costm.ChargesCompressFactor
         form = self.form_class(initial=self.initial)
-        context['form'] = form
-        return render(request, self.template_name, context)
+        self.context['form'] = form
+        return render(request, self.template_name, self.context)
 
     def post(self, request, *args, **kwargs):
-        context = {}
         form = self.form_class(request.POST)
-        context['form'] = form
+        self.context['form'] = form
         if form.is_valid():
             tenant = form.cleaned_data['tenant']
             category = form.cleaned_data['category']
@@ -181,18 +174,24 @@ class Cost(LoginRequiredMixin, View):
                 self.costm.GetCost(tenant,category,subject,answertime,destination,usage)
             except CostError as e:
                 costerror = True
-                context['costerror'] = costerror
-                context['expresion'] = e.expresion
-                context['mensage'] = e.mensage
-                return render(request,self.template_name,context)
+                self.context['costerror'] = costerror
+                self.context['expresion'] = e.expresion
+                self.context['mensage'] = e.mensage
+                return render(request,self.template_name,self.context)
 
-            context['sucess'] = True
-            return render(request,self.template_name,context)
+            self.context['sucess'] = True
+            self.context['Tenant'] = self.costm.Tenant
+            self.context['Usage'] = self.costm.Usage
+            self.context['Cost'] = self.costm.Cost
+            self.context['ChargesUsage'] = self.costm.ChargesUsage
+            self.context['ChargesCost'] = self.costm.ChargesCost
+            self.context['ChargesCompressFactor'] = self.costm.ChargesCompressFactor
+            return render(request,self.template_name,self.context)
         else:
             for field in form.errors:
                 form.fields[field].widget.attrs.update({'class':'form-control is-invalid'})
 
-            return render(request,self.template_name,context)
+            return render(request,self.template_name,self.context)
 
 
 class SupplierGet(LoginRequiredMixin,View):

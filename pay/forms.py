@@ -87,43 +87,50 @@ class CreateTpRatingProfiles(ModelForm):
     class Meta:
         models = TpRatingProfiles
         fields = '__all__'
-        widgets = {
-           # 'rating_plan_tag': Select(choices=upload_rating_plan()),
-            #'tenant':Select(choices=user_tenant())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpRatingProfiles,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['rating_plan_tag'] = forms.CharField(widget=forms.Select(choices=upload_rating_plan()))
 
 class CreateTpAccountActions(ModelForm):
+
     class Meta:
         models = TpAccountActions
         fields = '__all__'
-        widgets = {
-            #'tenant': Select(choices=upload_rating_profile()),
-            #'action_plan_tag': Select(choices=upload_actions_plan()),
-            #'action_triggers_tag': Select(choices=upload_action_triggers()),
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpAccountActions,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['action_plan_tag'] = forms.CharField(widget=forms.Select(choices=upload_actions_plan()))
+        self.fields['action_triggers_tag'] = forms.CharField(widget=forms.Select(choices=upload_action_triggers()))
 
 class CreateTpActionTriggers(ModelForm):
     class Meta:
         models = TpActionTriggers
         fields = '__all__'
-        widgets = {
-            #'actions_tag': Select(choices=upload_actions_id()),
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpActionTriggers,self).__init__(*args,**kwargs)
+        self.fields['actions_tag'] = forms.CharField(widget=forms.Select(choices=upload_actions_id()))
+
 class CreateTpActionPlans(ModelForm):
     class Meta:
         models = TpActionPlans
         fields = '__all__'
-        widgets = {
-            #'actions_tag': Select(choices=upload_actions_id()),
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpActionPlans,self).__init__(*args,**kwargs)
+        self.fields['actions_tag'] = forms.CharField(widget=forms.Select(choices=upload_actions_id()))
 
 class CreateChargers(ModelForm):
     class Meta:
         model = TpChargers
         fields = '__all__'
-        widgets = {
-            #'tenant': Select(choices=upload_rating_profile())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateChargers,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
 
 class CreateTpTimings(ModelForm):
     class Meta:
@@ -137,55 +144,63 @@ class CreateTpSharedGroups(ModelForm):
     class Meta:
         models = TpSharedGroups
         fields = '__all__'
-        widgets = {
-            #'account': Select(choices=upload_account())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpSharedGroups,self).__init__(*args,**kwargs)
+        self.fields['account'] = forms.CharField(widget=forms.Select(choices=upload_account()))
 
 class CreateTpSupplier(ModelForm):
     class Meta:
         models = TpSuppliers
         fields = '__all__'
-        widgets = {
-            #'tenant': Select(choices=upload_rating_profile()),
-            #'supplier_ratingplan_ids': Select(choices=upload_rating_plan())
-        }
+
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpSupplier,self).__init__(*args,**kwargs)
+        self.fields['tenant'] =  forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['supplier_ratingplan_ids'] = forms.CharField(widget=forms.Select(choices=upload_rating_plan()))
 
 class CreateTpFilter(ModelForm):
     class Meta:
         models = Filters
         fields = '__all__'
-        widgets = {
-            #'tenant':Select(choices=upload_rating_profile())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpFilter,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
 
 class CreateTpAttributes(ModelForm):
     class Meta:
         models = TpAttributes
         fields = '__all__'
-        widgets = {
-            #'tenant':Select(choices=upload_rating_profile()),
-            #'filter_ids':Select(choices=upload_filter_id())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateTpAttributes,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
+
 
 class CreateResource(ModelForm):
     class Meta:
         models = TpResources
         fields = '__all__'
-        widgets = {
-            #'tenant':Select(choices=upload_rating_profile()),
-            #'filter_ids':Select(choices=get_filter())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateResource,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
 
 
 class CreateThreshold(ModelForm):
     class Meta:
         models = TpThresholds
         fields = '__all__'
-        widgets = {
-            #'tenant':Select(choices=upload_rating_profile()),
-            #'filter_ids':Select(choices=get_filter()),
-            #'action_ids':Select(choices=upload_actions_id())
-        }
+
+    def __init__(self,*args,**kwargs):
+        super(CreateThreshold,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
+        self.fields['action_ids'] = forms.CharField(widget=forms.Select(choices=upload_actions_id()))
 
 class LoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
@@ -209,24 +224,33 @@ class BalanceAddForm(forms.Form):
     disabled        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}),required=False)
     value           = forms.DecimalField(decimal_places=2)
 
+    def __init__(self, *args, **kwargs):
+        super(BalanceAddForm,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(attrs={'class':'form-control'},choices=user_tenant()))
+
 class CostForm(forms.Form):
-    tenant          = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Tenant Domain of Carrier'}))
+    tenant          = forms.CharField(widget=forms.Select(attrs={'class':'form-control','placeholder':'Tenant Domain of Carrier'}))
     category        = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Type of record specifies the kind of transmission this rate'}))
     subject         = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The RatingSubject of the Balance'}))
     answertime      = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'The start time for this time period '}),validators=[activation_time_validate])
     destination     = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Destinations 7-digit dialing: 1NXX xxxx (NPA)'}), validators=[destinations_validate])
     usage           = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h"'}), validators=[usage_validate])
 
+    def __init__(self, *args, **kwargs):
+        super(CostForm,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(attrs={'class':'form-control'},choices=user_tenant()))
+
 
 class SupplierQuery(forms.Form):
-    #tenant = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_rating_profile())
     tenant = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
-    #id = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=get_supplier_id())
     id = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     context =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':' Context example: *sessions'}),required=False)
     time =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder': 'Time in place to call'}),required=False)
-    #accont = forms.ChoiceField(widget=forms.Select(attrs={'class':'form-control'}),choices=upload_account())
     accont = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     destinations = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Destinations'}))
 
-
+    def __init__(self, *args, **kwargs):
+        super(SupplierQuery,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(attrs={'class':'form-control'},choices=user_tenant()))
+        self.fields['id'] = forms.CharField(widget=forms.Select(attrs={'class':'form-control'},choices=get_supplier_id()))
+        self.fields['accont'] = forms.CharField(widget=forms.Select(attrs={'class':'form-control'},choices=upload_account()))
