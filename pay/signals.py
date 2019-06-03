@@ -766,7 +766,10 @@ def SetSupplierProfile(Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingPar
             "Tenant":Tenant,
             "ID":ID,
             "FilterIDs":[FilterIDs],
-            "ActivationInterval":None,
+            "ActivationInterval":{
+                "ActivationTime": ActivationInterval,
+                "ExpiryTime": '0001-01-01T00:00:00Z'
+            },
             "Sorting":Sorting,
             "SortingParameters":SortingParameters,
             "Suppliers":SupplierJson,

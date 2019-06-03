@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from pay.validators import csv_file_validator, activation_time_validate
-from pay.exception import CostError, BalanceError
+from pay.exception import CostError, BalanceError, SupplierError
 import hashlib, binascii, requests, json
 
 import datetime
@@ -285,7 +285,7 @@ class TpDestinationRates(models.Model):
     rounding_method = models.CharField(max_length=255)
     rounding_decimals = models.IntegerField()
     max_cost = models.DecimalField(max_digits=7, decimal_places=4)
-    max_cost_strategy = models.CharField(max_length=16)
+    max_cost_strategy = models.CharField(max_length=16, blank=True)
     created_at = models.DateTimeField()
 
     class Meta:
@@ -319,7 +319,7 @@ class TpRates(models.Model):
     connect_fee = models.DecimalField(max_digits=7, decimal_places=4)
     rate = models.DecimalField(max_digits=7, decimal_places=4)
     rate_unit = models.CharField(max_length=16,validators=[RegexValidator(regex='^[1-9][0-9]+$',message='The billing unit expressed in seconds'),])
-    rate_increment = models.CharField(max_length=16,validators=[RegexValidator(regex='^[1-9][0-9]+$',message='This rate will apply in increments of duration'),])
+    rate_increment = models.CharField(max_length=16,validators=[RegexValidator(regex='^[0-9]+$',message='This rate will apply in increments of duration'),])
     group_interval_start = models.CharField(max_length=16,validators=[RegexValidator(regex='^[0-9]+$',message='When the rate starts'),])
     created_at = models.DateTimeField()
 
@@ -770,30 +770,27 @@ class CostModel(CgratesAPI):
             self.ChargesCompressFactor  = json['result']['Charges'][0]['Increments'][0]['CompressFactor']
 
 class Suppliers_Query(CgratesAPI):
-    profileid = ''
-    sorting = ''
-    SortedSuppliers = {}
-
     def __init__(self):
         self.server=settings.CGRATES_JSONRPC
         self.head=settings.CGRATES_HEAD
+        self.profileid = ''
+        self.sorting = ''
+        self.SortedSuppliers = {}
 
     def ParseSupplierformat(self, data):
         self.profileid  = data['result']['ProfileID']
         self.sorting    = data['result']['Sorting']
         self.SortedSuppliers = data['result']['SortedSuppliers']
 
-    def GetSuppliers(self,tenant='',ID='',Context='',Time='',Account='',Destinations=''):
+    def GetSuppliers(self,tenant='',ID='',Time='',Account='',Destinations=''):
         payload = {
             "id": 1,
             "method":"SupplierSv1.GetSuppliers",
             "params":[{
-                "APIKey":"",
                 "IgnoreErrors":False,
                 "MaxCost":"",
                 "Tenant":tenant,
                 "ID":ID,
-                "Context":Context,
                 "Time":Time,
                 "Event":{
                     "Account":Account,
@@ -802,10 +799,14 @@ class Suppliers_Query(CgratesAPI):
                 },
                 "Limit":None,
                 "Offset":None,
-                "SearchTerm":""}]
+            }]
+
         }
         Json = self.Query(payload)
-        self.ParseSupplierformat(Json)
+        if Json['result'] == None:
+            raise SupplierError('Call API SupplierSv1.GetSuppliers', Json['error'])
+        else:
+            self.ParseSupplierformat(Json)
 
 
 

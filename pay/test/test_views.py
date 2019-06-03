@@ -1,8 +1,7 @@
-import unittest
+from django.test import TestCase
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import unittest
+
 
 class TestSigup(unittest.TestCase):
 
@@ -18,7 +17,6 @@ class TestSigup(unittest.TestCase):
         self.driver.get("http://192.168.100.142:8000/")
         title = self.driver.title
         self.assertEqual('Net Provider Solutions LLC',title)
-        print(self.driver.title)
         self.driver.close()
 
     def test_sign_up(self):
@@ -45,7 +43,9 @@ class TestSigup(unittest.TestCase):
         username.clear()
         password.clear()
         username.send_keys('admin')
-        password.send_keys('1234')
+        password.send_keys('admin')
         password.submit()
-
-
+        self.driver.implicitly_wait(30)
+        errormsg = self.driver.find_element_by_class_name('alert').text
+        self.assertEqual('Username or Password incorrect pleas try egain',errormsg)
+        self.driver.quit()

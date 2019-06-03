@@ -48,7 +48,7 @@
                                 <td>{{ cdr.answer_time }}</td>
                                 <td>{{ cdr.usage }}</td>
                                 <td>{{ cdr.cost_source }}</td>
-                                <td>{{ cdr.cost }}</td>
+                                <td>${{ cdr.cost }}</td>
                                 <td>{{ cdr.created_at }}</td>
                                 <td>{{ cdr.updated_at }}</td>
                             </tr>
@@ -65,7 +65,7 @@
                         data: {
                             labels: {{ dates }},
                             datasets: [{
-                                label: 'Cost',
+                                label: 'Cost ',
                                 data: {{ costs }},
                                 lineTension: 0,
                                 backgroundColor: '#007bff',

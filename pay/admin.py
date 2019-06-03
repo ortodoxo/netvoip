@@ -20,7 +20,7 @@ class DestinationsAdmin(admin.ModelAdmin):
 class RatesAdmin(admin.ModelAdmin):
     list_display = ('tag','connect_fee','rate','rate_unit','rate_increment','group_interval_start')
     search_fields = ['tag','rate']
-    fields = ('connect_fee','rate','rate_unit','rate_increment','group_interval_start')
+    fields = ('tag','connect_fee','rate','rate_unit','rate_increment','group_interval_start')
 
 class CarrierAdmin(admin.ModelAdmin):
     list_display = ('nameid','description','rate')

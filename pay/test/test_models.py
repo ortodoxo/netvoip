@@ -1,5 +1,5 @@
 from django.test import TestCase
-from pay.models import Carrier,RateDeck
+from pay.models import Carrier,RateDeck,Suppliers_Query
 from django.utils import timezone
 
 
@@ -27,3 +27,10 @@ class Ratedeck_Test(TestCase):
         ratedeck = self.create_ratedeck()
         self.assertTrue(isinstance(ratedeck,RateDeck))
         self.assertEqual(ratedeck.carrier.nameid,ratedeck.carrier.__str__())
+
+class Supplier_Test(TestCase):
+
+    def test_supplier(self):
+        Supplier = Suppliers_Query()
+        Supplier.GetSuppliers(tenant='netprovidersolutions',ID='INTER',Time='2019-06-03T11:04:05Z',Account='aat',Destinations='1407919')
+        self.assertEqual(Supplier.profileid,'INTER')

@@ -244,7 +244,6 @@ class CostForm(forms.Form):
 class SupplierQuery(forms.Form):
     tenant = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     id = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
-    context =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder':' Context example: *sessions'}),required=False)
     time =forms.CharField(widget=forms.TextInput(attrs={'class':'form-control','placeholder': 'Time in place to call'}),required=False)
     accont = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
     destinations = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Destinations'}))

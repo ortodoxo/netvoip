@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
 from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
-from pay.exception import CostError, BalanceError
+from pay.exception import CostError, BalanceError, SupplierError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from datetime import datetime
@@ -200,28 +200,32 @@ class SupplierGet(LoginRequiredMixin,View):
     initial = {'key': 'value'}
     template_name = 'pay/SupplierQuery.html'
     supplier_query = Suppliers_Query()
+    context = {}
 
     def get(self,request,*args,**kwargs):
-        context = {}
-        context['form'] = self.form
-        return render(request,self.template_name,context)
+        self.context['form'] = self.form
+        return render(request,self.template_name,self.context)
 
     def post(self,request,*args, **kwargs):
         form = self.form(request.POST)
-        contex = {}
         if form.is_valid():
             tenant = form.cleaned_data['tenant']
             id = form.cleaned_data['id']
-            context = form.cleaned_data['context']
             time = form.cleaned_data['time']
             accont = form.cleaned_data['accont']
             destinations = form.cleaned_data['destinations']
-            print(tenant,id,context,time,accont,destinations)
-            self.supplier_query.GetSuppliers(tenant,id,context,time,accont,destinations)
-            contex['ProfileID'] = str(self.supplier_query.profileid)
-            contex['Sorting'] = self.supplier_query.sorting
-            contex['SortedSuppliers'] = self.supplier_query.SortedSuppliers
-        return render(request,'pay/SupplierResult.html',contex)
+            try:
+                self.supplier_query.GetSuppliers(tenant,id,time,accont,destinations)
+            except SupplierError as e:
+                self.context['suppliererror'] = True
+                self.context['expresion'] = e.expresion
+                self.context['mensage'] = e.mensage
+                return render(request,self.template_name,self.context)
+
+            self.context['ProfileID'] = self.supplier_query.profileid
+            self.context['Sorting'] = self.supplier_query.sorting
+            self.context['SortedSuppliers'] = self.supplier_query.SortedSuppliers
+            return render(request,'pay/SupplierResult.html',self.context)
 
 
 class LoginView(View):
@@ -243,6 +247,7 @@ class LoginView(View):
                 login(request,user)
                 return HttpResponseRedirect('../dashboard')
             else:
+                messages.error(request,'Username or Password incorrect pleas try egain')
                 return HttpResponseRedirect('../')
 
 class LogoutView(View):

@@ -20,6 +20,15 @@
                 <img class="mb-4" src="https://getbootstrap.com/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
                 <h1 class="h3 mb-3 font-weight-normal">Cgrates Manager</h1>
                 <p>Net Providers Solutions LLC</p>
+            {% if messages %}
+            {% for message in messages %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% endif %}
             </div>
             <div class="form-label-group">
                 <!-- <input type="username" id="inputEmail" class="form-control" placeholder="Email address" required autofocus> -->
