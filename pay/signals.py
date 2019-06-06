@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from pay.models import RateDeck, TpDestinations, TpRatingProfiles, TpAccountActions, TpActionTriggers, \
     TpActions, TpActionPlans, TpSharedGroups, Filters, TpResources, TpThresholds, \
-    TpSuppliers, TpAttributes, Balance, TpChargers
+    TpSuppliers, TpAttributes, Balance, TpChargers, TpStats
 from pay.tasks import uploadrate, delete_rating_plan
 from django.db import transaction
 from requests.exceptions import ConnectionError
@@ -78,6 +78,14 @@ def pre_delete_ActionTriggers(sender, instance, **kwargs):
     GroupID = trigger.tag
     UniqueID = trigger.unique_id
     RemoveActionTrigger(GroupID,UniqueID)
+
+
+@receiver(pre_delete, sender=TpStats)
+def pre_delete_RemoveStatQueueProfile(sender, instance, **kwargs):
+    stats =  TpStats.objects.get(p_k=instance.pk)
+    tenant = stats.tenant
+    id = stats.id
+    RemoveStatQueueProfile(tenant,id)
 
 @receiver(post_save, sender=TpActionTriggers)
 def post_save_ActionTriggers(sender, instance, **kwargs):
@@ -186,6 +194,10 @@ def pre_delete_SharedGroups(sender, instance, **kwargs):
 
 @receiver(post_save, sender = Filters)
 def post_save_Filter(sender, instance, **kwargs):
+    filters = Filters.objects.get(pk=instance.pk)
+    FiltersArray = Filters.objects.filter(tenant=filters.tenant, id=filters.id)
+    FilterJson = Filter_Parse(FiltersArray)
+
     filter = Filters.objects.get(pk=instance.pk)
     Tenant = filter.tenant
     ID = filter.id
@@ -193,7 +205,7 @@ def post_save_Filter(sender, instance, **kwargs):
     FieldName = filter.filter_field_name
     Values = filter.filter_field_values
     ActivationInterval = filter.activation_interval
-    transaction.on_commit(lambda :SetFilter(Tenant,ID,Type,FieldName,Values,ActivationInterval))
+    transaction.on_commit(lambda :SetFilter(Tenant,ID,Type,FieldName,Values,ActivationInterval, FilterJson))
 
 @receiver(pre_delete, sender = Filters)
 def pre_delete_Filter(sender, instance, **kwargs):
@@ -269,6 +281,19 @@ def Supplier_Parse(supplier):
         sup_array.append(Supplier_Json)
     return sup_array
 
+''' Filter parte take a list of query by Tnenat and id'''
+
+def Filter_Parse(filter):
+    filter_array = []
+    for fltr in filter:
+        Filters_Json = {
+            "Type": fltr.filter_type if fltr.filter_type is not "" else "",
+            "FieldName": fltr.filter_field_name if fltr.filter_field_name is not "" else "",
+            "Values": fltr.filter_field_values.split(';') if fltr.filter_field_values.split(';') is not "" else ""
+        }
+        filter_array.append(Filters_Json)
+    return filter_array
+
 @receiver(post_save, sender = TpSuppliers)
 def post_save_Suppliers(sender, instance, **kwargs):
     Suppliers = TpSuppliers.objects.get(pk=instance.pk)
@@ -334,6 +359,24 @@ def post_save_Chargers(sender, instance, **kwargs):
     AttributeIDs = chargers.attribute_ids
     Weight = chargers.weight
     AddChargerProfile(Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight)
+
+@receiver(post_save, sender = TpStats)
+def post_save_Stats(sender, instance, **kwargs):
+    stats = TpStats.objects.get(p_k=instance.pk)
+    tenant =  stats.tenant
+    id = stats.id
+    filter_ids = stats.filter_ids
+    activation_interval = stats.activation_interval
+    queue_length = stats.queue_length
+    ttl = stats.ttl
+    min_items = stats.min_items
+    metric_ids = stats.metric_ids
+    metric_filter_ids = stats.metric_filter_ids
+    stored = stats.stored
+    blocker = stats.blocker
+    weight = stats.weight
+    threshold_ids = stats.threshold_ids
+    transaction.on_commit(lambda :SetStatQueueProfile(tenant,id,filter_ids,activation_interval,queue_length,ttl,min_items,metric_ids,metric_filter_ids,stored,blocker,weight,threshold_ids))
 
 def LoadDestination(ID, TPid):
     payload = {"id": 1,"method":"ApierV1.LoadDestination","params":[{"TPid":TPid,"ID": ID}]}
@@ -616,7 +659,7 @@ def RemTPSharedGroups(TPid,ID):
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
     print(r.content)
 
-def SetFilter(Tenant,ID,Type,FieldName,Values,ActivationInterval):
+def SetFilter(Tenant,ID,Type,FieldName,Values,ActivationInterval, FilterJson):
     '''
     :param Tenant:
     :param ID:
@@ -627,18 +670,13 @@ def SetFilter(Tenant,ID,Type,FieldName,Values,ActivationInterval):
     :param ActivationInterval:
     :return:
     '''
-    Values = Values.split(';')
     payload = {
         "id":1,
         "method":"ApierV1.SetFilter",
         "params":[{
             "Tenant":Tenant,
             "ID":ID,
-            "Rules":[{
-                "Type":Type,
-                "FieldName":FieldName,
-                "Values":Values
-            }],
+            "Rules":FilterJson,
             "ActivationInterval":{
                 "ActivationInterval":ActivationInterval,
                 "ExpiryTime":ActivationInterval
@@ -879,4 +917,62 @@ def AddChargerProfile(Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,
         }]
     }
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
+    print(r.content)
+
+
+'''
+SetResourceProfile
+    Tenant             string
+    ID                 string // identifier of this resource
+    FilterIDs          []string
+    ActivationInterval *utils.ActivationInterval // time when this resource becomes active and expires
+    UsageTTL           time.Duration             // auto-expire the usage after this duration
+    Limit              float64                   // limit value
+    AllocationMessage  string                    // message returned by the winning resource on allocation
+    Blocker            bool                      // blocker flag to stop processing on filters matched
+    Stored             bool
+    Weight             float64  // Weight to sort the resources
+    ThresholdIDs       []string // Thresholds to check after changing Limit
+'''
+
+def SetStatQueueProfile(Tenant,ID,FilterIDs,ActivationInterval,QueueLength,TTL,MinItems,Metrics,MetricFilterIDs,Stored,Blocker,Weight,ThresholdIDs):
+
+    paylaod = {
+        "id": 117,
+        "method":"ApierV1.SetStatQueueProfile",
+        "params":[{
+            "Tenant":Tenant,
+            "ID":ID,
+            "FilterIDs":[FilterIDs],
+            "ActivationInterval":{
+                "ActivationTime": ActivationInterval,
+                "ExpiryTime": '0001-01-01T00:00:00Z'
+            },
+            "QueueLength":QueueLength,
+            "TTL":int(TTL),
+            "MinItems":MinItems,
+            "Metrics":[{
+                "FilterIDs":None if MetricFilterIDs is "" else [MetricFilterIDs],
+                "MetricID":Metrics
+            }],
+            "Stored":True if Stored == 1 else False,
+            "Blocker":True if Blocker == 1 else False,
+            "Weight":float(Weight),
+            "ThresholdIDs":[ThresholdIDs]
+        }]
+    }
+    r = requests.post(SERVER, headers=HEAD, data=json.dumps(paylaod))
+    print(r.content)
+
+
+def RemoveStatQueueProfile(Tenant,ID):
+    paylaod = {
+        "id":145,
+        "method":"ApierV1.RemoveStatQueueProfile",
+        "params":[{
+            "Tenant":Tenant,
+            "ID":ID
+        }]
+    }
+    r = requests.post(SERVER, headers=HEAD, data=json.dumps(paylaod))
     print(r.content)

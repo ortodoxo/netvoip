@@ -314,7 +314,7 @@ class TpDestinations(models.Model):
 
 
 class TpRates(models.Model):
-    tpid = models.CharField(max_length=64)
+    tpid = models.CharField(max_length=64,default='CgratesPay')
     tag = models.CharField(max_length=64)
     connect_fee = models.DecimalField(max_digits=7, decimal_places=4)
     rate = models.DecimalField(max_digits=7, decimal_places=4)
@@ -468,13 +468,52 @@ class Versions(models.Model):
         db_table = 'versions'
 
 class Filters(models.Model):
+    '''
+    Type: the matching logic of each FilterRule is given by it's type. The following types are implemented:
+
+    *string will match in full the FieldName with at least one value defined inside Values. Any of the values matching will have the FilterRule as matched.
+    *notstring is the negation of *string.
+    *prefix will match at beginning of FieldName one of the values defined inside Values.
+    *notprefix is the negation of *prefix.
+    *suffix will match at end of FieldName one of the values defined inside Values.
+    *notsuffix is the negation of *suffix.
+    *empty will make sure that FieldName is empty or it does not exist in the event.
+    *notempty is the negation of *empty.
+    *exists will make sure that FieldName exists in the event.
+    *notexists is the negation of *exists.
+    *timings will compare the time contained in FieldName with one of the TimingIDs defined in Values.
+    *nottimings is the negation of *timings.
+    *destinations will make sure that the FieldName is a prefix contained inside one of the destination IDs as Values.
+    *notdestinations is the negation of *destinations.
+    *rsr will match the RSRRules defined in Values.
+    *notrsr is the negation of *rsr.
+    *lt (less than),
+    *lte (less than or equal),
+    *gt (greather than),
+    *gte (greather than or equal) are comparison operators and they pass if at least one of the values defined in Values are passing for the FieldName of event.
+    The operators are able to compare string, float, int, time.Time, time.Duration, however both types need to be the same, otherwise the filter will raise incomparable as error.
+    '''
     FILTERS = (
         ('*string','*string'),
+        ('*notstring','*notstring'),
         ('*prefix','*prefix'),
+        ('*notprefix','*notprefix'),
+        ('*suffix','*suffix'),
+        ('*notsuffix','*notsuffix'),
+        ('*empty','*empty'),
+        ('*notempty','*notempty'),
+        ('*exists','*exists'),
+        ('*notexists','*notexists'),
         ('*timings','*timings'),
+        ('*nottimings','*nottimings'),
         ('*destinations','*destinations'),
+        ('*notdestinations','*notdestinations'),
         ('*rsr','*rsr'),
-        ('*lt','*lt')
+        ('*notrsr','*notrsr'),
+        ('*lt','*lt'),
+        ('*lte','*lte'),
+        ('*gt','*gt'),
+        ('*gte','*gte')
     )
     p_k = models.AutoField(primary_key=True)
     tpid = models.CharField(max_length=64,default='CgratesPay')
@@ -552,6 +591,32 @@ class TpStats(models.Model):
         (1, 'True'),
         (0, 'False')
     )
+    '''
+    Following metrics are implemented:
+    
+    *asr: answer-seizure ratio. Relies on AnswerTime field in the Event.
+    *acd: average call duration. Uses AnswerTime and Usage fields in the Event.
+    *tcd: total call duration. Uses Usage out of Event.
+    *acc: average call cost. Uses Cost field out of Event.
+    *tcc: total call cost. Uses Cost field out of Event.
+    *pdd: post dial delay. Uses PDD field in the event.
+    *ddc: distinct destination count will keep the number of unique destinations found in Events. Relias on Destination field in the Event
+    *sum: generic metric to calculate mathematical sum for a specific field in the Events. Format: <*sum#FieldName>.
+    *average: generic metric to calculate the mathematical average of a specific field in the Events. Format: <*average#FieldName>.
+    *distinct: generic metric to return the distinct number of appearance of a field name within Events. Format: <*distinct#FieldName>.
+    '''
+    STATS = (
+        ('*asr','*asr'),
+        ('*acd','*acd'),
+        ('*tcd','*tcd'),
+        ('*acc','*acc'),
+        ('*tcc','*tcc'),
+        ('*pdd','*pdd'),
+        ('*ddc','*ddc'),
+        ('*sum','*sum'),
+        ('*average','*average'),
+        ('*distinct','*distinct')
+    )
     p_k  = models.AutoField(primary_key=True)
     tpid = models.CharField(max_length=64,default='CgratesPay')
     tenant = models.CharField(max_length=64)
@@ -561,12 +626,12 @@ class TpStats(models.Model):
     queue_length = models.IntegerField()
     ttl = models.CharField(max_length=32)
     min_items = models.IntegerField()
-    metric_ids = models.CharField(max_length=128)
-    metric_filter_ids = models.CharField(max_length=64)
-    stored = models.IntegerField()
-    blocker = models.IntegerField()
+    metric_ids = models.CharField(max_length=128, choices=STATS)
+    metric_filter_ids = models.CharField(max_length=64, blank=True)
+    stored = models.IntegerField(choices=APPEND)
+    blocker = models.IntegerField(choices=APPEND)
     weight = models.DecimalField(max_digits=8,decimal_places=2)
-    threshold_ids = models.CharField(max_length=64)
+    threshold_ids = models.CharField(max_length=64, default='*none')
     created_at = models.DateTimeField()
 
     class Meta:

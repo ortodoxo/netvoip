@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm, Select, TimeInput
 from pay.models import TpRatingProfiles, TpAccountActions, TpTimings, TpActionTriggers, TpActionPlans, \
-    TpChargers, TpSharedGroups, TpSuppliers, TpAttributes, Filters, TpResources, TpThresholds
+    TpChargers, TpSharedGroups, TpSuppliers, TpAttributes, Filters, TpResources, TpThresholds, TpStats
 from pay.validators import activation_time_validate, destinations_validate, usage_validate
 from django.db import connection
 
@@ -201,6 +201,15 @@ class CreateThreshold(ModelForm):
         self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
         self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
         self.fields['action_ids'] = forms.CharField(widget=forms.Select(choices=upload_actions_id()))
+
+class CreateStats(ModelForm):
+    class Meta:
+        model = TpStats
+        fields = '__all__'
+    def __init__(self, *args, **kwargs):
+        super(CreateStats,self).__init__(*args,**kwargs)
+        self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
 
 class LoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))

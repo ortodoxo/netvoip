@@ -10,7 +10,7 @@ from pay.models import TpDestinations,TpRates,Carrier,RateDeck,TpDestinationRate
     TpResources, Filters, TpSuppliers, TpAttributes, TpThresholds, Cdrs, TpStats, User
 from pay.forms import CreateTpRatingProfiles, CreateTpAccountActions, CreateTpTimings, CreateTpActionTriggers,\
     CreateTpActionPlans, CreateChargers, CreateTpSharedGroups, \
-    CreateTpSupplier, CreateTpFilter, CreateTpAttributes, CreateResource, CreateThreshold
+    CreateTpSupplier, CreateTpFilter, CreateTpAttributes, CreateResource, CreateThreshold, CreateStats
 
 class DestinationsAdmin(admin.ModelAdmin):
     list_display = ('tpid','tag','prefix')
@@ -20,7 +20,7 @@ class DestinationsAdmin(admin.ModelAdmin):
 class RatesAdmin(admin.ModelAdmin):
     list_display = ('tag','connect_fee','rate','rate_unit','rate_increment','group_interval_start')
     search_fields = ['tag','rate']
-    fields = ('tag','connect_fee','rate','rate_unit','rate_increment','group_interval_start')
+    fields = ('connect_fee','rate','rate_unit','rate_increment','group_interval_start')
 
 class CarrierAdmin(admin.ModelAdmin):
     list_display = ('nameid','description','rate')
@@ -118,6 +118,7 @@ class TpStatsAdmin(admin.ModelAdmin):
     list_display = ('tenant','id','filter_ids','activation_interval','queue_length','ttl','min_items','metric_ids','metric_filter_ids','stored','blocker','weight','threshold_ids')
     fields = ('tenant','id','filter_ids','activation_interval','queue_length','ttl','min_items','metric_ids','metric_filter_ids','stored','blocker','weight','threshold_ids')
     search_fields = ('tenant','id','filter_ids','activation_interval','queue_length','ttl','min_items','metric_ids','metric_filter_ids','stored','blocker','weight','threshold_ids')
+    form = CreateStats
 
 
 class CdrsAdmin(admin.ModelAdmin):
