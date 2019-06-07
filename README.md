@@ -1,37 +1,13 @@
-## Welcome to GitHub Pages
+## Welcome to Net Providers Solutions
+Net Providers Solutions was founded as a technical support company delivering great customer experience for our clients.
+We are committed to helping our clients increase consumer satisfaction. One of the most impactful ways to make a customer experience great is to deliver nonstop services.
+Since IT capabilities are the foundation of what powers those services, that means eliminating downtime and maintaining high availability of IT resources at peak performance.
+Your investment in IT resources will return a better customer experience. A company’s integrity is directly correlated to the level of service it provides.
+Let us help you meet your customer’s needs.
 
-You can use the [editor on GitHub](https://github.com/ortodoxo/netvoip/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+[Image](https://drive.google.com/open?id=1iDfFlaD_sbtyKcomAzYir4-7ASkkuiP1)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ortodoxo/netvoip/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+We are looking forward to hearing from you. Please feel free to get in touch via [Net Provier Solutions LLC](https://netprovidersolutions.com/) the form below, we will get back to you as soon as possible. To better serve you.

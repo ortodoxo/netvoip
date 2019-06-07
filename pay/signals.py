@@ -294,6 +294,18 @@ def Filter_Parse(filter):
         filter_array.append(Filters_Json)
     return filter_array
 
+'''Stats parse take a list of query by Tenant and Id'''
+
+def Stats_Parse(stats):
+    stats_array = []
+    for st in stats:
+        Stats_Json = {
+            "FilterIDs":None if st.metric_filter_ids is "" else st.metric_filter_ids.split(";"),
+            "MetricID": st.metric_ids
+        }
+        stats_array.append(Stats_Json)
+    return stats_array
+
 @receiver(post_save, sender = TpSuppliers)
 def post_save_Suppliers(sender, instance, **kwargs):
     Suppliers = TpSuppliers.objects.get(pk=instance.pk)
@@ -363,6 +375,9 @@ def post_save_Chargers(sender, instance, **kwargs):
 @receiver(post_save, sender = TpStats)
 def post_save_Stats(sender, instance, **kwargs):
     stats = TpStats.objects.get(p_k=instance.pk)
+    stats_array = TpStats.objects.filter(tenant=stats.tenant,id=stats.id)
+    stats_json = Stats_Parse(stats_array)
+
     tenant =  stats.tenant
     id = stats.id
     filter_ids = stats.filter_ids
@@ -376,7 +391,7 @@ def post_save_Stats(sender, instance, **kwargs):
     blocker = stats.blocker
     weight = stats.weight
     threshold_ids = stats.threshold_ids
-    transaction.on_commit(lambda :SetStatQueueProfile(tenant,id,filter_ids,activation_interval,queue_length,ttl,min_items,metric_ids,metric_filter_ids,stored,blocker,weight,threshold_ids))
+    transaction.on_commit(lambda :SetStatQueueProfile(tenant,id,filter_ids,activation_interval,queue_length,ttl,min_items,metric_ids,metric_filter_ids,stored,blocker,weight,threshold_ids, stats_json))
 
 def LoadDestination(ID, TPid):
     payload = {"id": 1,"method":"ApierV1.LoadDestination","params":[{"TPid":TPid,"ID": ID}]}
@@ -935,7 +950,7 @@ SetResourceProfile
     ThresholdIDs       []string // Thresholds to check after changing Limit
 '''
 
-def SetStatQueueProfile(Tenant,ID,FilterIDs,ActivationInterval,QueueLength,TTL,MinItems,Metrics,MetricFilterIDs,Stored,Blocker,Weight,ThresholdIDs):
+def SetStatQueueProfile(Tenant,ID,FilterIDs,ActivationInterval,QueueLength,TTL,MinItems,Metrics,MetricFilterIDs,Stored,Blocker,Weight,ThresholdIDs,StatsJson):
 
     paylaod = {
         "id": 117,
@@ -951,10 +966,7 @@ def SetStatQueueProfile(Tenant,ID,FilterIDs,ActivationInterval,QueueLength,TTL,M
             "QueueLength":QueueLength,
             "TTL":int(TTL),
             "MinItems":MinItems,
-            "Metrics":[{
-                "FilterIDs":None if MetricFilterIDs is "" else [MetricFilterIDs],
-                "MetricID":Metrics
-            }],
+            "Metrics":StatsJson,
             "Stored":True if Stored == 1 else False,
             "Blocker":True if Blocker == 1 else False,
             "Weight":float(Weight),
