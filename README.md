@@ -5,9 +5,7 @@ Since IT capabilities are the foundation of what powers those services, that mea
 Your investment in IT resources will return a better customer experience. A company’s integrity is directly correlated to the level of service it provides.
 Let us help you meet your customer’s needs.
 
-![Image]
-(https://drive.google.com/open?id=1iDfFlaD_sbtyKcomAzYir4-7ASkkuiP1)
-
+![Dashboard](https://netprovidersolutions.com/wp-content/uploads/2019/06/Screenshot_20190607_065751.png)
 
 ### Support or Contact
 
