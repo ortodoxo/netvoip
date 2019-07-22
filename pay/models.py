@@ -21,6 +21,24 @@ import hashlib, binascii, requests, json
 
 import datetime
 
+class CustomerReport(models.Model):
+    sumarydate  = models.DateField()
+    sumarytype  = models.CharField(max_length=40)
+    totaltype   = models.CharField(max_length=40)
+    completions = models.DecimalField(max_digits=20,decimal_places=2)
+    attempts    = models.DecimalField(max_digits=20,decimal_places=2)
+    minutes     = models.DecimalField(max_digits=20,decimal_places=2)
+    totalcost   = models.DecimalField(max_digits=20,decimal_places=2)
+    acd         = models.CharField(max_length=32)
+    acc         = models.DecimalField(max_digits=20,decimal_places=4)
+    asr         = models.CharField(max_length=32)
+
+    def __str__(self):
+        return self.sumarydate
+    class Meta:
+        managed = True
+        db_table = 'CustomerReport'
+
 class Carrier(models.Model):
     nameid = models.CharField(max_length=40)
     description = models.CharField(max_length=40,default="")

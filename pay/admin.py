@@ -123,6 +123,7 @@ class TpStatsAdmin(admin.ModelAdmin):
 
 class CdrsAdmin(admin.ModelAdmin):
     list_display = ('cgrid','run_id','origin_host','source','origin_id','tor','request_type','tenant','category','account','subject','destination','setup_time','answer_time','usage','cost_source','cost','created_at','updated_at')
+    search_fields = ('cgrid','run_id','origin_host','source','origin_id','tor','request_type','tenant','category','account','subject','destination','setup_time','answer_time','usage','cost_source','cost','created_at','updated_at')
 
 
 class UserAdmin(admin.ModelAdmin):

@@ -13,6 +13,7 @@ from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, T
 from pay.exception import CostError, BalanceError, SupplierError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
+from django.db.models import Sum
 from datetime import datetime
 import requests
 import json
@@ -39,23 +40,29 @@ class CdrsLIst(LoginRequiredMixin,ListView):
 
 
     def get_queryset(self):
-        return Cdrs.objects.exclude(run_id='*raw').filter(tenant=self.request.user.tenant).order_by('setup_time')
+        return  Cdrs.objects.filter(tenant='netprovidersolutions').extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
+                .values('setup_time') \
+                .annotate(cost = Sum('cost')) \
+                .exclude(run_id='*raw') \
+                .order_by('-setup_time')
+
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(CdrsLIst,self).get_context_data(**kwargs)
         costlist = []
         datelist = []
         usage = []
-
-        datecostquery = Cdrs.objects.exclude(run_id='*raw').values('setup_time','cost','usage').order_by('setup_time')
+        datecostquery = Cdrs.objects.filter(tenant='netprovidersolutions').extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
+                .values('setup_time') \
+                .annotate(cost = Sum('cost')) \
+                .exclude(run_id='*raw') \
+                .order_by('-setup_time')
         for data in datecostquery:
             costlist.append(str(data['cost']))
-            datelist.append(str(data['setup_time'].strftime('%I:%M:%S')))
-            usage.append(str(data['usage']))
+            datelist.append(str(data['setup_time']))
 
         context['costs'] = costlist
         context['dates'] = datelist
-        context['usage'] = usage
         return context
 
 
