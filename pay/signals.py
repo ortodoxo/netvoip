@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 import requests
 import json
 
-SERVER = 'http://192.168.100.142:2080/jsonrpc'
+SERVER = 'http://127.0.0.1:2080/jsonrpc'
 HEAD = {'content-type':'application/json'}
 
 @receiver(post_save, sender=RateDeck)
