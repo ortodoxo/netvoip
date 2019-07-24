@@ -554,10 +554,6 @@ def SetActionTrigger(GroupID,UniqueID,ThresholdType,ThresholdValue,Recurrent,Min
 def SetActions(ActionsId,Overwrite,Identifier,BalanceId,BalanceUuid,BalanceType,Units,
                ExpiryTime,Filter,TimingTags,DestinationIds,RatingSubject,Categories,SharedGroups,
                BalanceWeight,ExtraParameters,BalanceBlocker,BalanceDisabled,Weight):
-
-    if Units is not None:
-        print('fuck te coji')
-
     payload = {
         "id":1,
         "method":"ApierV1.SetActions",
