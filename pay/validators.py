@@ -3,6 +3,7 @@ import os
 import io
 import re
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
 from django.core.validators import RegexValidator
 
 
@@ -26,7 +27,10 @@ def csv_file_validator(value):
     reader = csv.reader(io_string, delimiter=',')
     for row in reader:
         if re.match('^(1[2-9]|[2-9])([0-9]{2})([2-9][0-9]{2})',row[0]) == None:
-            raise ValidationError("The prefix will be valid")
+            raise ValidationError(
+                _("The prefix will be valid: %(value)s"),
+                params={'value':row[0]},
+            )
     return True
 
 def activation_time_validate(value):
