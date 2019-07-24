@@ -1,7 +1,5 @@
 {% extends 'pay/base_site.html' %}
     {% block body %}
-        {% if perms.pay %}
-            {% if perms.pay.cdrs %}
         <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
         <h2>Summary</h2>
             <div class="table-responsive">
@@ -10,6 +8,7 @@
                         <tr>
                             <th>Date</th>
                             <th>Cost</th>
+                            <th>Account</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -17,6 +16,7 @@
                             <tr>
                                 <td>{{ cdr.setup_time }}</td>
                                 <td>${{ cdr.cost }}</td>
+                                <td>{{ cdr.account }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -56,6 +56,4 @@
                     });
                 </script>
                 {% endautoescape %}
-            {% endif %}
-        {% endif %}
     {% endblock %}

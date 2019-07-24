@@ -40,9 +40,19 @@ class CdrsLIst(LoginRequiredMixin,ListView):
 
 
     def get_queryset(self):
-        return  Cdrs.objects.filter(tenant='netprovidersolutions').extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
-                .values('setup_time') \
+        if self.request.user.is_superuser:
+            return  Cdrs.objects.filter(tenant=self.request.user.tenant)\
+                .extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
+                .values('setup_time','account') \
                 .annotate(cost = Sum('cost')) \
+                .exclude(run_id='*raw') \
+                .order_by('-setup_time')
+        else:
+            return Cdrs.objects.filter(tenant=self.request.user.tenant).extra(
+                select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
+                .values('setup_time','account') \
+                .filter(account=self.request.user.username) \
+                .annotate(cost=Sum('cost')) \
                 .exclude(run_id='*raw') \
                 .order_by('-setup_time')
 
@@ -52,11 +62,22 @@ class CdrsLIst(LoginRequiredMixin,ListView):
         costlist = []
         datelist = []
         usage = []
-        datecostquery = Cdrs.objects.filter(tenant='netprovidersolutions').extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
-                .values('setup_time') \
+        if self.request.user.is_superuser:
+            datecostquery = Cdrs.objects.filter(tenant=self.request.user.tenant)\
+                .extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
+                .values('setup_time','account') \
                 .annotate(cost = Sum('cost')) \
                 .exclude(run_id='*raw') \
                 .order_by('-setup_time')
+        else:
+            datecostquery = Cdrs.objects.filter(tenant=self.request.user.tenant)\
+                .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
+                .values('setup_time','account') \
+                .filter(account=self.request.user.username) \
+                .annotate(cost=Sum('cost')) \
+                .exclude(run_id='*raw') \
+                .order_by('-setup_time')
+
         for data in datecostquery:
             costlist.append(str(data['cost']))
             datelist.append(str(data['setup_time']))
