@@ -2,7 +2,7 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" serverName="root@192.168.100.142:22" uploadOnCheckin="93367116-7677-48c8-a5da-ecd01233ca3b">
     <serverData>
-      <paths name="LocalCgrates">
+      <paths name="ProductionsNVC">
         <serverdata>
           <mappings>
             <mapping deploy="/cgrates" local="$PROJECT_DIR$" web="/" />

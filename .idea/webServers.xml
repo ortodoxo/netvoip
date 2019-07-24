@@ -2,12 +2,12 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="61405714-e214-4a85-a92f-397e9863fd73" name="LocalCgrates" url="http://192.168.100.142">
-        <fileTransfer host="192.168.100.142" port="22" rootFolder="/root" accessType="SFTP">
+      <webServer id="61405714-e214-4a85-a92f-397e9863fd73" name="ProductionsNVC" url="http://192.99.34.53">
+        <fileTransfer host="192.99.34.53" port="2222" rootFolder="/var/www/html" accessType="SFTP">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" />
           </advancedOptions>
-          <option name="port" value="22" />
+          <option name="port" value="2222" />
         </fileTransfer>
       </webServer>
       <webServer id="93367116-7677-48c8-a5da-ecd01233ca3b" name="root@192.168.100.142:22" url="http:///">
