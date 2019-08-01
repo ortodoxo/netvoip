@@ -5,6 +5,13 @@ from pay.models import TpRatingProfiles, TpAccountActions, TpTimings, TpActionTr
 from pay.validators import activation_time_validate, destinations_validate, usage_validate
 from django.db import connection
 
+
+def upload_attribute_id():
+    cursor = connection.cursor()
+    cursor.execute("SELECT id,id FROM tp_attributes")
+    row = cursor.fetchall()
+    return row
+
 def upload_rating_plan():
     cursor = connection.cursor()
     cursor.execute("SELECT DISTINCT tag, tag FROM tp_rating_plans")
@@ -131,6 +138,8 @@ class CreateChargers(ModelForm):
     def __init__(self,*args,**kwargs):
         super(CreateChargers,self).__init__(*args,**kwargs)
         self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
+        #self.fields['attribute_ids'] = forms.CharField(widget=forms.Select(choices=upload_attribute_id()))
 
 class CreateTpTimings(ModelForm):
     class Meta:
