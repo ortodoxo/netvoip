@@ -920,8 +920,11 @@ def AddChargerProfile(Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,
         "params":[{
             "Tenant":Tenant,
             "ID":ID,
-            "FilterIDs":[],
-            "ActivationInterval":None,
+            "FilterIDs":[FilterIDs],
+            "ActivationInterval":{
+                "ActivationTime":'0001-01-01T00:00:00Z',
+                "ExpiryTime": ActivationInterval
+            },
             "RunID":RunID,
             "AttributeIDs":[AttributeIDs],
             "Weight":float(Weight)
