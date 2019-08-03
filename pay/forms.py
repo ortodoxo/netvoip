@@ -9,7 +9,8 @@ from django.db import connection
 def upload_attribute_id():
     cursor = connection.cursor()
     cursor.execute("SELECT id,id FROM tp_attributes")
-    row = cursor.fetchall()
+    row = (('*none','*none'),)
+    row += cursor.fetchall()
     return row
 
 def upload_rating_plan():
@@ -139,7 +140,7 @@ class CreateChargers(ModelForm):
         super(CreateChargers,self).__init__(*args,**kwargs)
         self.fields['tenant'] = forms.CharField(widget=forms.Select(choices=user_tenant()))
         self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
-        #self.fields['attribute_ids'] = forms.CharField(widget=forms.Select(choices=upload_attribute_id()))
+        self.fields['attribute_ids'] = forms.CharField(widget=forms.Select(choices=upload_attribute_id()))
 
 class CreateTpTimings(ModelForm):
     class Meta:

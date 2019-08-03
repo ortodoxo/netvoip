@@ -580,6 +580,18 @@ class TpSuppliers(models.Model):
         verbose_name = 'Supplier'
 
 class TpAttributes(models.Model):
+    TYPE = (
+        ('*constant','*constant'),
+        ('*variable','*variable'),
+        ('*composed','*composed'),
+        ('*usage_difference','*usage_difference'),
+        ('*sum','*sum'),
+        ('*value_exponent','value_exponent')
+    )
+    CONTEXT = (
+        ('*sessions','*sessions'),
+        ('*cdrs','*cdrs')
+    )
     APPEND = (
         (1,'True'),
         (0,'False')
@@ -588,12 +600,12 @@ class TpAttributes(models.Model):
     tpid= models.CharField(max_length=64, default='CgratesPay')
     tenant = models.CharField(max_length=64)
     id = models.CharField(max_length=64)
-    contexts = models.CharField(max_length=64)
+    contexts = models.CharField(max_length=64, choices=CONTEXT)
     filter_ids = models.CharField(max_length=64)
     activation_interval = models.CharField(max_length=64,blank=True,default='0000-01-01T00:00:00Z')
-    attribute_filter_ids = models.CharField(max_length=64)
+    attribute_filter_ids = models.CharField(max_length=64,blank=True)
     field_name = models.CharField(max_length=64)
-    type = models.CharField(max_length=64)
+    type = models.CharField(max_length=64,choices=TYPE)
     value = models.CharField(max_length=64)
     blocker = models.IntegerField(choices=APPEND)
     weight = models.DecimalField(max_digits=8, decimal_places=2)

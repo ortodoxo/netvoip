@@ -281,6 +281,25 @@ def Supplier_Parse(supplier):
         sup_array.append(Supplier_Json)
     return sup_array
 
+'''
+ Attribute parte take a list of query by tenant and id
+'''
+
+def Attribute_Parse(attribute):
+    attribute_array =[]
+    for attr in attribute:
+        Attribute_Json = {
+            "FilterIDs":[],
+            "FieldName":attr.field_name,
+            "Type":attr.type,
+            "Value":[{
+                "Rules":attr.value,
+                "AllFiltersMatch":True if attr.blocker == 1 else False
+            }]
+        }
+        attribute_array.append(Attribute_Json)
+    return attribute_array
+
 ''' Filter parte take a list of query by Tnenat and id'''
 
 def Filter_Parse(filter):
@@ -340,17 +359,20 @@ def pre_delete_Suppliers(sender, instance, **kwargs):
 @receiver(post_save, sender = TpAttributes)
 def post_save_Attributes(sender, instance, **kwargs):
     attributes = TpAttributes.objects.get(pk=instance.pk)
+    attributes_array = TpAttributes.objects.filter(tenant=attributes.tenant,id=attributes.id)
+    Attribute_Json = Attribute_Parse(attributes_array)
     Tenant = attributes.tenant
     ID = attributes.id
     Contexts = attributes.contexts
     FilterIDs = attributes.filter_ids
     ActivationInterval = attributes.activation_interval
+    AttributeFilterIds = attributes.attribute_filter_ids
     FieldName = attributes.field_name
-    Initial = attributes.initial
-    Substitute = attributes.substitute
-    Append = attributes.append
+    Type = attributes.type
+    Value = attributes.value
+    Blocker = attributes.blocker
     Weight = attributes.weight
-    transaction.on_commit(lambda :SetAttributeProfile(Tenant, ID, Contexts, FilterIDs, ActivationInterval, FieldName, Initial, Substitute, Append, Weight))
+    transaction.on_commit(lambda :SetAttributeProfile(Tenant, ID, Contexts, FilterIDs, ActivationInterval, AttributeFilterIds,FieldName, Type, Value, Blocker, Weight,Attribute_Json))
 
 @receiver(pre_delete, sender = TpAttributes)
 def pre_delete_Attributes(sender, instance, **kwargs):
@@ -841,7 +863,8 @@ def RemoveSupplierProfile(Tenant,ID):
         r = requests.post(SERVER, headers=HEAD, data=json.dumps(payload))
     except ConnectionError:
         pass
-def SetAttributeProfile(Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight):
+
+def SetAttributeProfile(Tenant, ID, Contexts, FilterIDs, ActivationInterval, AttributeFilterIds,FieldName, Type, Value, Blocker, Weight,Attribute_Json):
     '''
 
     :param Tenant:
@@ -850,17 +873,12 @@ def SetAttributeProfile(Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldNam
     :param FilterIDs:
     :param ActivationInterval:
     :param FieldName:
-    :param Initial:
+    :param Type:
     :param Substitute:
     :param Append:
     :param Weight:
     :return:
     '''
-
-    if Append == 1:
-        Append = True
-    else:
-        Append = False
 
     payload= {
         "id":1,
@@ -869,22 +887,13 @@ def SetAttributeProfile(Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldNam
             "Tenant":Tenant,
             "ID":ID,
             "Contexts":[Contexts],
-            "FilterIDs":[FilterIDs],
+            "FilterIDs":[FilterIDs] if FilterIDs is not "" else None,
             "ActivationInterval":{
                 "ActivationTime":ActivationInterval,
-                "ExpiryTime":ActivationInterval
+                "ExpiryTime":'0001-01-01T00:00:00Z'
             },
-            "Attributes":[{
-                "FieldName":FieldName,
-                "Initial":Initial,
-                "Substitute":[
-                    {
-                        "Rules":Substitute,
-                        "AllFiltersMatch":True
-                    }
-                ],
-                "Append":Append
-            }],
+            "Attributes":Attribute_Json,
+            "Blocker":True if Blocker is 1 else False,
             "Weight":float(Weight)
         }]
     }
