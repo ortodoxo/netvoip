@@ -14,8 +14,8 @@
             <tbody>
             <tr>
                 <td>{{ Uuid }}</td>
-                <td>{{ Value }}</td>
-                <td>{{ UnitCounters }}</td>
+                <td>{{ Value|floatformat:2}}</td>
+                <td>{{ UnitCounters|floatformat:2 }}</td>
                 <td>
                     <a href="{% url 'balance_add' ID Tenant %}" class="badge badge-primary">Add</a>
                     <a href="#" class="badge badge-danger">Reset</a>

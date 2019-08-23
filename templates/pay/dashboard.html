@@ -15,7 +15,7 @@
                         {% for cdr in cdrs %}
                             <tr>
                                 <td>{{ cdr.setup_time }}</td>
-                                <td>${{ cdr.cost }}</td>
+                                <td>${{ cdr.cost|floatformat:2 }}</td>
                                 <td>{{ cdr.account }}</td>
                             </tr>
                         {% endfor %}

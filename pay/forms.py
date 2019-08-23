@@ -168,7 +168,10 @@ class CreateTpSupplier(ModelForm):
     def __init__(self,*args,**kwargs):
         super(CreateTpSupplier,self).__init__(*args,**kwargs)
         self.fields['tenant'] =  forms.CharField(widget=forms.Select(choices=user_tenant()))
+        self.fields['filter_ids'] = forms.CharField(widget=forms.Select(choices=upload_filter_id()))
         self.fields['supplier_ratingplan_ids'] = forms.CharField(widget=forms.Select(choices=upload_rating_plan()))
+        self.fields['supplier_id'] = forms.CharField(widget=forms.Select(choices=upload_account()))
+
 
 class CreateTpFilter(ModelForm):
     class Meta:

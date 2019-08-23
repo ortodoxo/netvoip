@@ -102,9 +102,9 @@ def create_rate(data, carrier_rate, ListTp, tagid):
     IntrastateRate = data['Intrastate']
     IndeterminateRate = data['Indeterminate']
 
-    ListTp.append([tagid,InterstateTag,'0',InterstateRate,'60s',carrier_rate,'0s'])
-    ListTp.append([tagid,IntrastateTag,'0',IntrastateRate,'60s',carrier_rate,'0s'])
-    ListTp.append([tagid,IndeterminateTag,'0',IndeterminateRate,'60s',carrier_rate,'0s'])
+    ListTp.append([tagid,InterstateTag,'0.0009',InterstateRate,'60s',carrier_rate,'0s'])
+    ListTp.append([tagid,IntrastateTag,'0.0009',IntrastateRate,'60s',carrier_rate,'0s'])
+    ListTp.append([tagid,IndeterminateTag,'0.0009',IndeterminateRate,'60s',carrier_rate,'0s'])
 
 
 def create_destinationrates(data, ListTp, tagid):
