@@ -382,6 +382,13 @@ def pre_delete_Attributes(sender, instance, **kwargs):
     Contexts = attributes.contexts
     RemoveAttributeProfile(Tenant, ID, Contexts)
 
+@receiver(pre_delete, sender = TpChargers)
+def pre_delete_Chargers(sender, instance, **kwargs):
+    charger =  TpChargers.objects.get(pk=instance.pk)
+    Tenant = charger.tenant
+    ID = charger.id
+    RemoveChargerProfile(Tenant,ID)
+
 @receiver(post_save,sender = TpChargers)
 def post_save_Chargers(sender, instance, **kwargs):
     chargers = TpChargers.objects.get(pk=instance.pk)
@@ -995,4 +1002,16 @@ def RemoveStatQueueProfile(Tenant,ID):
         }]
     }
     r = requests.post(SERVER, headers=HEAD, data=json.dumps(paylaod))
+    print(r.content)
+
+def RemoveChargerProfile(Tenant,ID):
+    payload = {
+        "id":146,
+        "method":"ApierV1.RemoveChargerProfile",
+        "params":[{
+            "Tenant": Tenant,
+            "ID": ID
+        }]
+    }
+    r = requests.post(SERVER,headers=HEAD,data=json.dumps(payload))
     print(r.content)
