@@ -8,6 +8,7 @@
                         <tr>
                             <th>Date</th>
                             <th>Cost</th>
+                            <th>Minutes</th>
                             <th>Account</th>
                         </tr>
                     </thead>
@@ -16,11 +17,33 @@
                             <tr>
                                 <td>{{ cdr.setup_time }}</td>
                                 <td>${{ cdr.cost|floatformat:2 }}</td>
+                                <td>{{ cdr.usage }}</td>
                                 <td>{{ cdr.account }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% if cdrs.has_previous %}
+                            <li class="page-item"><a class="page-link" href="{% url 'dashboard' cdrs.previous_page_number %}">Previous</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="#" tabindex="-1" >Previous</a></li>
+                        {% endif %}
+                        {% for page in cdrs.paginator.page_range %}
+                            {% if page is cdrs.number %}
+                                <li class="page-item active"><a class="page-link" href="{% url 'dashboard' page %}">{{ page }}</a></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{% url 'dashboard' page %}">{{ page }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if cdrs.has_next %}
+                            <li class="page-item"><a class="page-link" href="{% url 'dashboard' cdrs.next_page_number %}">Next</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{% url 'dashboard' cdrs.paginator.num_pages %}" tabindex="-1">Last</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
         <!-- Graphs -->
         {% autoescape off %}
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>

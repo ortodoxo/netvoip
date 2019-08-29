@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf.urls import url
+from django.core.paginator import Paginator
 from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
 from pay.exception import CostError, BalanceError, SupplierError
 from django.views import View
@@ -31,46 +32,47 @@ class AccountList(LoginRequiredMixin,ListView):
     def get_queryset(self):
         return TpAccountActions.objects.filter(tenant=self.request.user.tenant)
 
-
-class CdrsLIst(LoginRequiredMixin,ListView):
-    model = Cdrs
+class Cdrs_for_Page(LoginRequiredMixin,View):
     login_url = '../login'
     template_name = 'pay/dashboard.html'
-    context_object_name = 'cdrs'
-    context = {'costs':'','dates':'','cdrs':''}
+    context = {}
+    costlist = []
+    datelist = []
+    page = None
 
-    def get_queryset(self):
-        costlist = []
-        datelist = []
+    def get(self, request, *args, **kwargs):
+        self.costlist = []
+        self.datelist = []
         if self.request.user.is_superuser:
             cdrserver = Cdrs.objects.filter(tenant=self.request.user.tenant) \
                 .exclude(run_id='*raw') \
                 .exclude(extra_info='REPLY_TIMEOUT') \
-                .extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
-                .values('setup_time','account') \
-                .annotate(cost = Sum('cost')) \
+                .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
+                .values('setup_time', 'account') \
+                .annotate(cost=Sum('cost')) \
+                .annotate(usage=Sum('usage')/60000000000) \
                 .order_by('-setup_time')
         else:
             cdrserver = Cdrs.objects.filter(tenant=self.request.user.tenant) \
                 .exclude(run_id='*raw') \
                 .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
-                .values('setup_time','account') \
+                .values('setup_time',  'account') \
                 .filter(account=self.request.user.username) \
                 .annotate(cost=Sum('cost')) \
+                .annotate(usage=Sum('usage')/60000000000) \
                 .order_by('-setup_time')
-
+        self.page = Paginator(cdrserver, 2)
+        num = kwargs['page']
+        cdrserver = self.page.page(num)
         for data in cdrserver:
-            costlist.append(str(data['cost']))
-            datelist.append(str(data['setup_time']))
-
-        self.context['costs'] = costlist
-        self.context['dates'] = datelist
+            self.costlist.append(str(data['cost']))
+            self.datelist.append(str(data['setup_time']))
+        self.context['costs'] = self.costlist
+        self.context['dates'] = self.datelist
         self.context['cdrs'] = cdrserver
-        return cdrserver
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        return self.context
+        self.context['pages'] = self.page
+        return render(request,self.template_name, context=self.context)
 
 class AccountDetail(LoginRequiredMixin,DetailView):
     model = TpAccountActions
@@ -258,7 +260,7 @@ class LoginView(View):
             user = authenticate(request,username=username, password=password)
             if user is not None:
                 login(request,user)
-                return HttpResponseRedirect('../dashboard')
+                return HttpResponseRedirect('../dashboard/1/')
             else:
                 messages.error(request,'Username or Password incorrect pleas try egain')
                 return HttpResponseRedirect('../')
