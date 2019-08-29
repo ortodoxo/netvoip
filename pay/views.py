@@ -37,55 +37,40 @@ class CdrsLIst(LoginRequiredMixin,ListView):
     login_url = '../login'
     template_name = 'pay/dashboard.html'
     context_object_name = 'cdrs'
-
+    context = {'costs':'','dates':'','cdrs':''}
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return  Cdrs.objects.filter(tenant=self.request.user.tenant)\
-                .extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
-                .values('setup_time','account') \
-                .annotate(cost = Sum('cost')) \
-                .exclude(run_id='*raw') \
-                .order_by('-setup_time')
-        else:
-            return Cdrs.objects.filter(tenant=self.request.user.tenant).extra(
-                select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
-                .values('setup_time','account') \
-                .filter(account=self.request.user.username) \
-                .annotate(cost=Sum('cost')) \
-                .exclude(run_id='*raw') \
-                .order_by('-setup_time')
-
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super(CdrsLIst,self).get_context_data(**kwargs)
         costlist = []
         datelist = []
-        usage = []
         if self.request.user.is_superuser:
-            datecostquery = Cdrs.objects.filter(tenant=self.request.user.tenant)\
+            cdrserver = Cdrs.objects.filter(tenant=self.request.user.tenant) \
+                .exclude(run_id='*raw') \
+                .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time":"DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
                 .values('setup_time','account') \
                 .annotate(cost = Sum('cost')) \
-                .exclude(run_id='*raw') \
                 .order_by('-setup_time')
         else:
-            datecostquery = Cdrs.objects.filter(tenant=self.request.user.tenant)\
+            cdrserver = Cdrs.objects.filter(tenant=self.request.user.tenant) \
+                .exclude(run_id='*raw') \
+                .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
                 .values('setup_time','account') \
                 .filter(account=self.request.user.username) \
                 .annotate(cost=Sum('cost')) \
-                .exclude(run_id='*raw') \
                 .order_by('-setup_time')
 
-        for data in datecostquery:
+        for data in cdrserver:
             costlist.append(str(data['cost']))
             datelist.append(str(data['setup_time']))
 
-        context['costs'] = costlist
-        context['dates'] = datelist
-        return context
+        self.context['costs'] = costlist
+        self.context['dates'] = datelist
+        self.context['cdrs'] = cdrserver
+        return cdrserver
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return self.context
 
 class AccountDetail(LoginRequiredMixin,DetailView):
     model = TpAccountActions
