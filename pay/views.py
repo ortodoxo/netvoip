@@ -49,6 +49,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
                 .values('setup_time', 'account') \
+                .annotate(acd=Avg('usage')/60000000000) \
                 .annotate(acc=Avg('cost')) \
                 .annotate(cost=Sum('cost')) \
                 .annotate(usage=Sum('usage')/60000000000) \
@@ -60,6 +61,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
                 .values('setup_time',  'account') \
                 .filter(account=self.request.user.username) \
+                .annotate(acd=Avg('usage')/60000000000) \
                 .annotate(acc=Avg('cost')) \
                 .annotate(cost=Sum('cost')) \
                 .annotate(usage=Sum('usage')/60000000000) \

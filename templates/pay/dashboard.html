@@ -9,6 +9,7 @@
                             <th>Date</th>
                             <th>Cost</th>
                             <th>Acc</th>
+                            <th>Acd</th>
                             <th>Minutes</th>
                             <th>Account</th>
                         </tr>
@@ -19,6 +20,7 @@
                                 <td>{{ cdr.setup_time }}</td>
                                 <td>${{ cdr.cost|floatformat:2 }}</td>
                                 <td>${{ cdr.acc }}</td>
+                                <td>{{ cdr.acd|floatformat:2 }}</td>
                                 <td>{{ cdr.usage }}</td>
                                 <td>{{ cdr.account }}</td>
                             </tr>
