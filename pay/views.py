@@ -14,7 +14,7 @@ from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, T
 from pay.exception import CostError, BalanceError, SupplierError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from datetime import datetime
 import requests
 import json
@@ -49,6 +49,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
                 .values('setup_time', 'account') \
+                .annotate(acc=Avg('cost')) \
                 .annotate(cost=Sum('cost')) \
                 .annotate(usage=Sum('usage')/60000000000) \
                 .order_by('-setup_time')
@@ -59,6 +60,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
                 .values('setup_time',  'account') \
                 .filter(account=self.request.user.username) \
+                .annotate(acc=Avg('cost')) \
                 .annotate(cost=Sum('cost')) \
                 .annotate(usage=Sum('usage')/60000000000) \
                 .order_by('-setup_time')
