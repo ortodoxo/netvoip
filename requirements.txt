@@ -7,7 +7,7 @@ cffi==1.12.3
 chardet==3.0.4
 coverage==5.0a6
 cryptography==2.7
-Django==2.2.4
+Django==2.2.13
 django-auth==0.1.9
 entrypoints==0.3
 httplib2==0.13.1
