@@ -7,17 +7,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.conf.urls import url
 from django.core.paginator import Paginator
-from pay.models import TpAccountActions, Cdrs, CgratesAPI, Balance, CostModel, TpSuppliers, Suppliers_Query, User
+from pay.models import TpAccountActions, Cdrs, Balance, CostModel, TpSuppliers, Suppliers_Query, CdrExport
 from pay.exception import CostError, BalanceError, SupplierError
 from django.views import View
 from .forms import LoginForm, BalanceAddForm, CostForm, SupplierQuery
 from django.db.models import Sum, Avg
 from datetime import datetime
-import requests
-import json
+import json, io, zipfile
 
 
 SERVER = 'http://192.168.100.142:2080/jsonrpc'
@@ -48,7 +45,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .exclude(run_id='*raw') \
                 .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"})\
-                .values('setup_time', 'account') \
+                .values('setup_time', 'account','tenant') \
                 .annotate(acd=Avg('usage')/60000000000) \
                 .annotate(acc=Avg('cost')) \
                 .annotate(cost=Sum('cost')) \
@@ -59,7 +56,7 @@ class Cdrs_for_Page(LoginRequiredMixin,View):
                 .exclude(run_id='*raw') \
                 .exclude(extra_info='REPLY_TIMEOUT') \
                 .extra(select={"setup_time": "DATE_FORMAT(setup_time,'%%Y-%%m-%%d')"}) \
-                .values('setup_time',  'account') \
+                .values('setup_time',  'account', 'tenant') \
                 .filter(account=self.request.user.username) \
                 .annotate(acd=Avg('usage')/60000000000) \
                 .annotate(acc=Avg('cost')) \
@@ -275,3 +272,21 @@ class LogoutView(View):
         logout(request)
         return HttpResponseRedirect('../')
 
+class CdrExportView(LoginRequiredMixin,View):
+    template_name = 'pay/dashboard.html'
+    context = {}
+    export = CdrExport()
+
+    def get(self, request, *args, **kwargs):
+        tenant = kwargs['tenant']
+        account = kwargs['account']
+        TimeS = datetime.strptime(kwargs['timestart'],'%Y-%m-%d')
+        timestart = int(datetime.timestamp(TimeS))
+        print(timestart)
+        file = self.export.getCDRExportZipFile(tenant, account, timestart)
+        print(str.encode(file,'utf-8'))
+        with zipfile.ZipFile('foo.zip','w') as myzip:
+            myzip.writestr(zinfo_or_arcname=myzip.filename,data=str.encode(file,'utf-8'))
+        response = HttpResponse(file, content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % 'foo.zip'
+        return response

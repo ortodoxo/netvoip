@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from pay.validators import csv_file_validator, activation_time_validate
-from pay.exception import CostError, BalanceError, SupplierError
+from pay.exception import CostError, BalanceError, SupplierError, CdrExportError
 import hashlib, binascii, requests, json
 
 import datetime
@@ -903,5 +903,31 @@ class Suppliers_Query(CgratesAPI):
         else:
             self.ParseSupplierformat(Json)
 
+
+class CdrExport(CgratesAPI):
+
+    def __init__(self):
+        self.server = settings.CGRATES_JSONRPC
+        self.head = settings.CGRATES_HEAD
+
+    def getCDRExportZipFile(self, Tenant, Account, TimeStart):
+
+        payload = {
+            "id":555,
+            "method":"ApierV1.ExportCdrsToZipString",
+            "params":[{
+                 "ExportFileName":"foo.csv",
+                 "Tenants":[Tenant],                #      []string // If provided, it will filter tenant
+                 "Accounts":[Account],              #      []string // If provided, it will filter account
+                 "TimeStart":str(TimeStart),        #       string   // If provided, it will represent the starting of the CDRs interval (>=)
+                 "TimeEnd":"1567123200",            #       string   // If provided, it will represent the end of the CDRs interval (<)
+            }]
+        }
+        Json = self.Query(payload=payload)
+
+        if Json['result'] == None:
+            raise CdrExportError('Call API ApierV1.ExportCdrsToZipString', Json['error'])
+        else:
+            return Json['result']
 
 

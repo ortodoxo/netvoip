@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
-from pay.views import AccountList, AccountDetail, LoginView, LogoutView, Balance_Add, Cost, SupplierGet, Cdrs_for_Page
+from pay.views import AccountList, AccountDetail, LoginView, LogoutView, Balance_Add, Cost, SupplierGet, Cdrs_for_Page, CdrExportView
 
 urlpatterns = [
     path('account/', AccountList.as_view(), name='accountactions'),
@@ -11,5 +11,6 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout', LogoutView.as_view(), name='logout'),
     path('cost', Cost.as_view(), name='cost'),
-    path('supplierquery',SupplierGet.as_view(), name='supplierquery')
+    path('supplierquery',SupplierGet.as_view(), name='supplierquery'),
+    path('cdrexportzip/<str:tenant>/<str:account>/<str:timestart>/', CdrExportView.as_view(), name='cdrexportzip')
 ]

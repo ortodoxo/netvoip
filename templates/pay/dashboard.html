@@ -17,7 +17,7 @@
                     <tbody>
                         {% for cdr in cdrs %}
                             <tr>
-                                <td>{{ cdr.setup_time }}</td>
+                                <td><a href="{% url 'cdrexportzip' cdr.tenant cdr.account cdr.setup_time %}">{{ cdr.setup_time }}</a></td>
                                 <td>${{ cdr.cost|floatformat:2 }}</td>
                                 <td>${{ cdr.acc }}</td>
                                 <td>{{ cdr.acd|floatformat:2 }}</td>
