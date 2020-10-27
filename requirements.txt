@@ -6,7 +6,7 @@ certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
 coverage==5.0a6
-cryptography==2.7
+cryptography==3.2
 Django==2.2.15
 django-auth==0.1.9
 entrypoints==0.3
