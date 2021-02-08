@@ -10,7 +10,7 @@ cryptography==2.7
 Django==2.2.15
 django-auth==0.1.9
 entrypoints==0.3
-httplib2==0.18.1
+httplib2==0.19.0
 idna==2.8
 importlib-metadata==0.19
 jeepney==0.4.1
